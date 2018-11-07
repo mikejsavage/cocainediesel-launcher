@@ -367,7 +367,7 @@ automatically_print_output_at_exit = setmetatable( { }, {
 			if cfg.extra_ldflags then
 				printf( "    extra_ldflags = %s", cfg.extra_ldflags )
 			end
-			printf( "default %s", bin_name )
+			printf( "default %s", bin_path )
 		end
 	end
 } )
