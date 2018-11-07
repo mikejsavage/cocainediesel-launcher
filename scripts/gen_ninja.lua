@@ -139,43 +139,73 @@ toolchain = rightmost( "toolchain" )
 local dir = "build/" .. triple
 local output = { }
 
+local function flatten_into( res, t )
+	for _, x in ipairs( t ) do
+		if type( x ) == "table" then
+			flatten_into( res, x )
+		else
+			table.insert( res, x )
+		end
+	end
+end
+
+local function flatten( t )
+	local res = { }
+	flatten_into( res, t )
+	return res
+end
+
 local function join( names, suffix, prefix )
 	if not names then
 		return ""
 	end
 
 	prefix = prefix or ""
-	local res = { }
-	for i, name in ipairs( names ) do
-		if type( name ) == "table" then
-			res[ i ] = join( name, suffix, prefix )
-		else
-			res[ i ] = dir .. "/" .. prefix .. names[ i ] .. suffix
-		end
+	local flat = flatten( names )
+	for i = 1, #flat do
+		flat[ i ] = dir .. "/" .. prefix .. flat[ i ] .. suffix
 	end
-	return table.concat( res, " " )
-end
-
-local function printh( form, ... )
-	print( form:format( ... ) )
+	return table.concat( flat, " " )
 end
 
 local function printf( form, ... )
-	table.insert( output, form:format( ... ) )
+	print( form:format( ... ) )
 end
 
-function bin( bin_name, objs, libs )
-	assert( type( objs ) == "table", "objs should be a table" )
+local objs = { }
+local bins = { }
+local libs = { }
+
+local function add_srcs( srcs )
+	for _, src in ipairs( flatten( srcs ) ) do
+		if not objs[ src ] then
+			objs[ src ] = { }
+		end
+	end
+end
+
+function bin( bin_name, srcs, libs )
+	assert( type( srcs ) == "table", "srcs should be a table" )
 	assert( not libs or type( libs ) == "table", "libs should be a table or nil" )
-	local bin_path = ( "%s%s%s" ):format( bin_prefix, bin_name, bin_suffix )
-	printh( "BINS += %s", bin_path )
-	printf( "%s: %s %s", bin_path, join( objs, obj_suffix ), join( libs, lib_suffix, lib_prefix ) )
-	printf( "clean::\n\trm -f %s", bin_path )
+	assert( not bins[ bin_name ] )
+
+	bins[ bin_name ] = {
+		srcs = srcs,
+		libs = libs,
+	}
+
+	add_srcs( srcs )
 end
 
-function lib( lib_name, objs )
-	assert( type( objs ) == "table", "objs should be a table" )
-	printf( "%s/%s%s%s: %s", dir, lib_prefix, lib_name, lib_suffix, join( objs, obj_suffix ) )
+function lib( lib_name, srcs )
+	assert( type( srcs ) == "table", "srcs should be a table" )
+	assert( not libs[ lib_name ] )
+
+	libs[ lib_name ] = {
+		srcs = srcs,
+	}
+
+	add_srcs( srcs )
 end
 
 function rc( rc_name )
@@ -186,24 +216,24 @@ function rc( rc_name )
 		printf( "\t@rc /fo$@ /nologo $<" )
 	else
 		local cxx = rightmost( "cxx" )
-		printf( "%s/%s%s:", dir, rc_name, obj_suffix )
-		printf( "\t@printf \"\\033[1;33mbuilding $@\\033[0m\\n\"" )
-		printf( "\t@mkdir -p \"$(@D)\"" )
-		printf( "\t@%s -c -x c++ /dev/null -o $@", cxx )
+		printf( "build %s/%s%s: rc", dir, rc_name, obj_suffix )
 	end
 end
 
 function bin_ldflags( bin_name, ldflags )
-	local bin_path = ( "%s%s%s" ):format( bin_prefix, bin_name, bin_suffix )
-	printf( "%s: LDFLAGS += %s", bin_path, ldflags )
+	bins[ bin_name ].extra_ldflags = ( bins[ bin_name ].extra_ldflags or "" ) .. " " .. ldflags
 end
 
-function obj_cxxflags( obj_name, cxxflags )
-	printf( "%s/%s%s: CXXFLAGS += %s", dir, obj_name, obj_suffix, cxxflags )
+function obj_cxxflags( src_name, cxxflags )
+	objs[ src_name ].extra_cxxflags = ( objs[ src_name ].extra_cxxflags or "" ) .. " " .. cxxflags
 end
 
-function obj_replace_cxxflags( obj_name, cxxflags )
-	printf( "%s/%s%s: CXXFLAGS := %s", dir, obj_name, obj_suffix, cxxflags )
+function obj_replace_cxxflags( src_name, cxxflags )
+	for name, cfg in pairs( objs ) do
+		if name:match( src_name ) then
+			cfg.cxxflags = cxxflags
+		end
+	end
 end
 
 local function toolchain_helper( t, f )
@@ -222,13 +252,8 @@ gcc_bin_ldflags = toolchain_helper( "gcc", bin_ldflags )
 gcc_obj_cxxflags = toolchain_helper( "gcc", obj_cxxflags )
 gcc_obj_replace_cxxflags = toolchain_helper( "gcc", obj_replace_cxxflags )
 
-printf( "CXXFLAGS := %s", cxxflags )
-printf( "LDFLAGS := %s", ldflags )
-printf( "MAKEFLAGS += -r" )
-
-printf( "" )
-printf( "all: $(BINS)" )
-printf( "" )
+printf( "cxxflags = %s", cxxflags )
+printf( "ldflags = %s", ldflags )
 
 if toolchain == "msvc" then
 
@@ -273,44 +298,76 @@ elseif toolchain == "gcc" then
 local cxx = rightmost( "cxx" )
 
 printf( [[
-$(BINS): %%:
-	@env printf "\033[1;31mbuilding $@\033[0m\n"
-	@mkdir -p "$(@D)"
-	@%s -o $@ $^ $(LDFLAGS)
-]], cxx )
-printf( [[
-%s/%%%s: %%.cc
-	@env printf "\033[1;32mbuilding $<\033[0m\n"
-	@mkdir -p "$(@D)"
-	@%s $(CXXFLAGS) -o $@ $< -MMD -MP
-]], dir, obj_suffix, cxx )
-printf( [[
-$(OBJS): %%:
-	@env printf "\033[1;32mbuilding $<\033[0m\n"
-	@mkdir -p "$(@D)"
-	@%s $(CXXFLAGS) -o $@ $< -MMD -MP
-]], cxx )
-printf( [[
-%%%s:
-	@env printf "\033[1;35mbuilding $@\033[0m\n"
-	@mkdir -p "$(@D)"
-	@$(AR) rs $@ $^
-]], lib_suffix )
+cc = %s
+cpp = %s
 
--- you can't -include %s/**.d, so let's hardcode 6 levels and hope that's enough
-printf( "-include %s/*.d", dir )
-printf( "-include %s/*/*.d", dir )
-printf( "-include %s/*/*/*.d", dir )
-printf( "-include %s/*/*/*/*.d", dir )
-printf( "-include %s/*/*/*/*/*.d", dir )
-printf( "-include %s/*/*/*/*/*/*.d", dir )
+rule cpp
+    command = $cpp -MD -MF $out.d $cxxflags $extra_cxxflags -c  -o $out $in
+    depfile = $out.d
+    deps = gcc
+
+rule m
+    command = $cpp -MD -MF $out.d $mflags $extra_mflags -c  -o $out $in
+    depfile = $out.d
+    deps = gcc
+
+rule bin
+    command = $cpp $ldflags $extra_ldflags -o $out $in
+
+rule lib
+    command = ar rs $out $in
+
+rule rc
+    command = $cpp -c -x c++ /dev/null -o $out
+]], "gcc", cxx )
 
 end
 
-printf( "clean::\n\trm -rf build release" )
+-- function bin( bin_name, srcs, libs )
+-- 	assert( type( srcs ) == "table", "srcs should be a table" )
+-- 	assert( not libs or type( libs ) == "table", "libs should be a table or nil" )
+-- 	local bin_path = ( "%s%s%s" ):format( bin_prefix, bin_name, bin_suffix )
+-- 	printh( "default %s", bin_path )
+-- 	printf( "build %s: bin %s %s", bin_path, join( srcs, obj_suffix ), join( libs, lib_suffix, lib_prefix ) )
+-- end
+--
+-- function lib( lib_name, srcs )
+-- 	assert( type( srcs ) == "table", "srcs should be a table" )
+-- 	printf( "build %s/%s%s%s: lib %s", dir, lib_prefix, lib_name, lib_suffix, join( srcs, obj_suffix ) )
+-- end
+
+local function rule_for_src( src_name )
+	local ext = src_name:match( "%.(.+)$" )
+	return ( { cc = "cpp", m = "m" } )[ ext ]
+end
 
 automatically_print_output_at_exit = setmetatable( { }, {
 	__gc = function()
-		print( table.concat( output, "\n" ) )
+		for src_name, cfg in pairs( objs ) do
+			local rule = rule_for_src( src_name )
+			printf( "build %s/%s%s: %s %s", dir, src_name, obj_suffix, rule, src_name )
+			if cfg.cxxflags then
+				printf( "    cxxflags = %s", cfg.cxxflags )
+			end
+			if cfg.extra_cxxflags then
+				printf( "    extra_cxxflags = %s", cfg.extra_cxxflags )
+			end
+		end
+
+		for lib_name, cfg in pairs( libs ) do
+			printf( "build %s/%s%s%s: lib %s", dir, lib_prefix, lib_name, lib_suffix, join( cfg.srcs, obj_suffix ) )
+		end
+
+		for bin_name, cfg in pairs( bins ) do
+			local bin_path = ( "%s%s%s" ):format( bin_prefix, bin_name, bin_suffix )
+			printf( "build %s: bin %s %s", bin_path, join( cfg.srcs, obj_suffix ), join( cfg.libs, lib_suffix, lib_prefix ) )
+			if cfg.ldflags then
+				printf( "    ldflags = %s", cfg.ldflags )
+			end
+			if cfg.extra_ldflags then
+				printf( "    extra_ldflags = %s", cfg.extra_ldflags )
+			end
+			printf( "default %s", bin_name )
+		end
 	end
 } )

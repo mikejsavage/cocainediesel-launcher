@@ -2,20 +2,21 @@ all: debug
 .PHONY: debug asan release clean
 
 debug:
-	@lua make.lua > gen.mk
-	@$(MAKE) -f gen.mk
+	@scripts/lua.linux make.lua > build.ninja
+	@scripts/ninja.linux
 
 asan:
-	@lua make.lua asan > gen.mk
-	@$(MAKE) -f gen.mk
+	@scripts/lua.linux make.lua asan > build.ninja
+	@scripts/ninja.linux
 
 release:
-	@lua make.lua release > gen.mk
-	@$(MAKE) -f gen.mk
+	@scripts/lua.linux make.lua release > build.ninja
+	@scripts/ninja.linux
 
 clean:
-	@lua make.lua debug > gen.mk
-	@$(MAKE) -f gen.mk clean
-	@lua make.lua asan > gen.mk
-	@$(MAKE) -f gen.mk clean
-	@rm -f gen.mk
+	@scripts/lua.linux make.lua debug > build.ninja
+	@scripts/ninja.linux -t clean || true
+	@scripts/lua.linux make.lua asan > build.ninja
+	@scripts/ninja.linux -t clean || true
+	@rm -rf build release
+	@rm -f build.ninja

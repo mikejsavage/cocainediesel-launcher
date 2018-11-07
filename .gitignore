@@ -1,6 +1,9 @@
 build
 release
-gen.mk
+
+build.ninja
+.ninja_deps
+.ninja_log
 
 *.exe
 *.pdb

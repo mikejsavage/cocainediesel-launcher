@@ -2,8 +2,9 @@ version: "{build}"
 clone_depth: 1
 
 build_script:
-- cmd: make release
+- cmd: scripts/lua.exe make.lua release > build.ninja
+- cmd: scripts/ninja.exe
 
 artifacts:
 - path: release
-  name: launcher_windows
+  name: cocaine_diesel_windows

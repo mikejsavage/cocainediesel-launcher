@@ -1,2 +1,2 @@
-lib( "whereami", { "libs/whereami/whereami" } )
-msvc_obj_cxxflags( "libs/whereami/whereami", "/wd4005" )
+lib( "whereami", { "libs/whereami/whereami.cc" } )
+msvc_obj_cxxflags( "libs/whereami/whereami.cc", "/wd4005" )

@@ -1,3 +1,3 @@
-lib( "monocypher", { "libs/monocypher/monocypher" } )
-msvc_obj_cxxflags( "libs/monocypher/monocypher", "/O2" )
-gcc_obj_cxxflags( "libs/monocypher/monocypher", "-O3 -g0" )
+lib( "monocypher", { "libs/monocypher/monocypher.cc" } )
+msvc_obj_cxxflags( "libs/monocypher/monocypher.cc", "/O2" )
+gcc_obj_cxxflags( "libs/monocypher/monocypher.cc", "-O3 -g0" )
