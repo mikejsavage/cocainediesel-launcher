@@ -3,8 +3,10 @@ clone_depth: 1
 image: Ubuntu
 
 build_script:
+- sh: sudo apt-get -y update
+- sh: sudo apt-get -y install lua
 - sh: make -j$(nproc --all) release
 
 artifacts:
-- path: release
-  name: launcher_linux
+- path: source/build
+  name: cocaine_diesel_linux
