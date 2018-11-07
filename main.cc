@@ -968,7 +968,7 @@ int main( int argc, char ** argv ) {
 		);
 		ImGui::PushFont( small );
 		for( const std::string & line : log ) {
-			ImGui::TextWrapped( line.c_str() );
+			ImGui::TextWrapped( "%s", line.c_str() );
 		}
 		ImGui::PopFont();
 		ImGui::EndChildFrame();
