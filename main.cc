@@ -31,9 +31,9 @@
 #include "libs/whereami/whereami.h"
 
 #if PLATFORM_WINDOWS
-#define GAME_BINARY "cocaine_diesel.exe"
+#define GAME_BINARY "client.exe"
 #else
-#define GAME_BINARY "cocaine_diesel"
+#define GAME_BINARY "client"
 #endif
 
 #define HEX256_PATTERN "%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x"
