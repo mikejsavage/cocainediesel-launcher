@@ -43,26 +43,26 @@
 
 #define SIGNATURE_PATTERN HEX256_PATTERN HEX256_PATTERN
 
-const u8 logo[] = {
+static const u8 logo[] = {
 #include "logo.h"
 };
 
-const u8 PUBLIC_KEY[] = {
+static const u8 PUBLIC_KEY[] = {
 	0x3b, 0x0a, 0xc7, 0xa1, 0xd1, 0x9e, 0xbd, 0x0c,
 	0x71, 0x75, 0x4f, 0xfc, 0x2a, 0xef, 0xcf, 0x91,
 	0x93, 0xd0, 0x58, 0x94, 0x79, 0xc2, 0xeb, 0x16,
 	0x30, 0x74, 0x62, 0x88, 0xe8, 0x18, 0x03, 0xb6,
 };
 
-static std::vector< std::string > log;
+static std::vector< std::string > log_lines;
 
 template< typename... Rest >
 static void LOG( const char * fmt, const Rest & ... rest ) {
-	log.push_back( std::string() );
+	log_lines.push_back( std::string() );
 
 	size_t space_required = ggformat( nullptr, 0, fmt, rest... );
 
-	std::string & result = log.back();
+	std::string & result = log_lines.back();
 	result.resize( space_required + 1 ); // + 1 so there's space for the null terminator...
 	ggformat( &result[ 0 ], space_required + 1, fmt, rest... );
 	result.resize( space_required ); // ...and then trim it off
@@ -967,7 +967,7 @@ int main( int argc, char ** argv ) {
 			| ImGuiWindowFlags_AlwaysVerticalScrollbar
 		);
 		ImGui::PushFont( small );
-		for( const std::string & line : log ) {
+		for( const std::string & line : log_lines ) {
 			ImGui::TextWrapped( "%s", line.c_str() );
 		}
 		ImGui::PopFont();
