@@ -13,16 +13,16 @@ if OS == "macos" then
 end
 
 local objs = {
-	"main", "launch_manifest", 
+	"main", "cocainediesel_manifest",
 	"ggformat", "strlcpy", "strtonum", "patterns",
 	"gl", "glad", "liberation", "png",
 }
 local libs = { "glfw", "imgui", "monocypher", "stb_image", "stb_truetype", "whereami" }
 
-bin( "launch", objs, libs )
-msvc_bin_ldflags( "launch", "opengl32.lib gdi32.lib Ws2_32.lib" )
-rc( "launch_manifest" )
-gcc_bin_ldflags( "launch", game_ldflags )
+bin( "cocainediesel", objs, libs )
+msvc_bin_ldflags( "cocainediesel", "opengl32.lib gdi32.lib Ws2_32.lib" )
+rc( "cocainediesel_manifest" )
+gcc_bin_ldflags( "cocainediesel", game_ldflags )
 
 if config == "release" then
 	return

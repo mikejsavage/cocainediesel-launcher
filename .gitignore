@@ -8,24 +8,11 @@ gen.mk
 *.suo
 *.trace
 
-launch
-test_lockfree
-
+cocainediesel
 b2sum
 genkeys
 sign
 
-logs
-update
-
 secret_key.h
 
-.deps
-
-tests
-mess
-TODO
 WC
-a.out
-ctime
-*.png
