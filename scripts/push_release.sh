@@ -2,5 +2,5 @@
 
 version=$(basename $(pwd))
 cd release
-rsync -v * mjs:/var/www/medfall
-ssh mjs "echo \"$version\" > /var/www/medfall/version.txt"
+rsync -v * mjs:/var/www/cocainediesel
+ssh mjs "echo \"$version\" > /var/www/cocainediesel/version.txt"
