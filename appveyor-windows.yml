@@ -2,8 +2,8 @@ version: "{build}"
 clone_depth: 1
 
 build_script:
-- cmd: scripts/lua.exe make.lua release > build.ninja
-- cmd: scripts/ninja.exe
+- cmd: scripts\lua.exe make.lua release > build.ninja
+- cmd: scripts\ninja.exe
 
 artifacts:
 - path: release
