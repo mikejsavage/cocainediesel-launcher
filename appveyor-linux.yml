@@ -1,0 +1,10 @@
+version: "{build}"
+clone_depth: 1
+image: Ubuntu
+
+build_script:
+- sh: make -j$(nproc --all) release
+
+artifacts:
+- path: release
+  name: launcher_linux
