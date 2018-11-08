@@ -23,16 +23,6 @@ elseif OS == "linux" then
 	} )
 
 	obj_replace_cxxflags( "libs/glfw/src/.+", "-c -x c -O2 -D_GLFW_X11" )
-elseif OS == "macos" then
-	lib( "glfw", {
-		common_srcs,
-		"libs/glfw/src/cocoa_init.m", "libs/glfw/src/cocoa_monitor.m", "libs/glfw/src/cocoa_window.m",
-		"libs/glfw/src/cocoa_joystick.m", "libs/glfw/src/cocoa_time.cc", "libs/glfw/src/posix_thread.cc",
-		"libs/glfw/src/egl_context.cc", "libs/glfw/src/nsgl_context.m", "libs/glfw/src/osmesa_context.cc",
-	} )
-
-	obj_replace_cxxflags( "libs/glfw/src/.+", "-c -x c -O2 -D_GLFW_COCOA -mmacosx-version-min=10.9" )
-	obj_replace_mflags( "libs/glfw/src/.+", "-c -O2 -D_GLFW_COCOA -Wno-deprecated-declarations -mmacosx-version-min=10.9" )
 else
 	error( "don't know how to build GLFW on this platform" )
 end

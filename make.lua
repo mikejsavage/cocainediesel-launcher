@@ -6,15 +6,9 @@ require( "libs/monocypher" )
 require( "libs/stb" )
 require( "libs/whereami" )
 
-local gcc_ldflags = "-lX11 -lcurl"
-local prebuild_libs
-
+local prebuilt_libs
 if OS == "windows" then
 	prebuilt_libs = { "curl" }
-end
-
-if OS == "macos" then
-	gcc_ldflags = "-framework Cocoa -framework CoreVideo -framework IOKit"
 end
 
 bin( "cocainediesel", {
@@ -29,7 +23,7 @@ bin( "cocainediesel", {
 	rc = "cocainediesel_manifest",
 
 	msvc_extra_ldflags = "opengl32.lib gdi32.lib Ws2_32.lib",
-	gcc_extra_ldflags = gcc_ldflags,
+	gcc_extra_ldflags = "-lX11 -lcurl",
 } )
 
 if config == "release" then

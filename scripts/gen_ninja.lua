@@ -19,8 +19,6 @@ local configs = {
 		warnings = "/W4 /wd4100 /wd4146 /wd4189 /wd4201 /wd4324 /wd4351 /wd4127 /wd4505 /wd4530 /wd4702 /D_CRT_SECURE_NO_WARNINGS",
 	},
 
-	[ "windows-64" ] = { },
-
 	[ "windows-debug" ] = {
 		cxxflags = "/Od /MDd /Z7 /Zo",
 		ldflags = "/Od /MDd /Z7 /Zo",
@@ -43,8 +41,6 @@ local configs = {
 		warnings = "-Wall -Wextra -Wno-unused-parameter -Wno-unused-function -Wshadow -Wcast-align -Wstrict-overflow -Wvla -Wformat-security", -- -Wconversion
 	},
 
-	[ "linux-64" ] = { },
-
 	[ "linux-debug" ] = {
 		cxxflags = "-O0 -ggdb3 -fno-omit-frame-pointer",
 	},
@@ -62,23 +58,11 @@ local configs = {
 	-- TODO: mingw?
 }
 
-configs[ "macos" ] = copy( configs[ "linux" ] )
-configs[ "macos" ].cxx = "clang++"
--- TODO: this is not quite right because it can get nuked by gcc_obj_replace_cxxflags
-configs[ "macos" ].cxxflags = configs[ "macos" ].cxxflags .. " -mmacosx-version-min=10.9"
-configs[ "macos" ].ldflags = "-lm"
-
-configs[ "macos-64" ] = copy( configs[ "linux-64" ] )
-configs[ "macos-debug" ] = copy( configs[ "linux-debug" ] )
-configs[ "macos-asan" ] = copy( configs[ "linux-asan" ] )
-configs[ "macos-release" ] = copy( configs[ "linux-release" ] )
-configs[ "macos-release" ].ldflags = "-Wl,-dead_strip -Wl,-x"
-
 local function identify_host()
 	local dll_ext = package.cpath:match( "(%a+)$" )
 
 	if dll_ext == "dll" then
-		return "windows", "64"
+		return "windows"
 	end
 
 	local p = assert( io.popen( "uname -s" ) )
@@ -86,26 +70,20 @@ local function identify_host()
 	assert( p:close() )
 
 	if uname == "Linux" then
-		return "linux", "64"
-	end
-
-	if uname == "Darwin" then
-		return "macos", "64"
+		return "linux"
 	end
 
 	io.stderr:write( "can't identify host OS" )
 	os.exit( 1 )
 end
 
-OS, arch = identify_host()
+OS = identify_host()
 config = arg[ 1 ] or "debug"
 
-local double_arch = OS .. "-" .. arch
-local double_config = OS .. "-" .. config
-local triple = OS .. "-" .. arch .. "-" .. config
+local OS_config = OS .. "-" .. config
 
-if not configs[ double_arch ] or not configs[ double_config ] then
-	io.stderr:write( "bad config: " .. triple .. "\n" )
+if not configs[ OS_config ] then
+	io.stderr:write( "bad config: " .. OS_config .. "\n" )
 	os.exit( 1 )
 end
 
@@ -113,15 +91,12 @@ local function concat( key )
 	return ""
 		.. ( ( configs[ OS ] and configs[ OS ][ key ] ) or "" )
 		.. " "
-		.. ( ( configs[ double_arch ] and configs[ double_arch ][ key ] ) or "" )
-		.. " "
-		.. ( ( configs[ double_config ] and configs[ double_config ][ key ] ) or "" )
+		.. ( ( configs[ OS_config ] and configs[ OS_config ][ key ] ) or "" )
 end
 
 local function rightmost( key )
 	return nil
-		or ( configs[ double_config ] and configs[ double_config ][ key ] )
-		or ( configs[ double_arch ] and configs[ double_arch ][ key ] )
+		or ( configs[ OS_config ] and configs[ OS_config ][ key ] )
 		or ( configs[ OS ] and configs[ OS ][ key ] )
 		or ""
 end
@@ -136,7 +111,7 @@ local ldflags = concat( "ldflags" )
 
 toolchain = rightmost( "toolchain" )
 
-local dir = "build/" .. triple
+local dir = "build/" .. OS_config
 local output = { }
 
 local function flatten_into( res, t )
@@ -176,7 +151,7 @@ local function joinpb( names, suffix, prefix )
 	prefix = prefix or ""
 	local flat = flatten( names )
 	for i = 1, #flat do
-		flat[ i ] = "libs/" .. flat[ i ] .. "/" .. triple .. "/" .. prefix .. flat[ i ] .. suffix
+		flat[ i ] = "libs/" .. flat[ i ] .. "/" .. OS_config .. "/" .. prefix .. flat[ i ] .. suffix
 	end
 	return table.concat( flat, " " )
 end
