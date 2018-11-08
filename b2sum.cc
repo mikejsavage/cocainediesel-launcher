@@ -11,7 +11,7 @@ int main() {
 
 	while( true ) {
 		u8 buf[ 8192 ];
-		ssize_t n = fread( buf, 1, sizeof( buf ), stdin );
+		int n = checked_cast< int >( fread( buf, 1, sizeof( buf ), stdin ) );
 		if( n == 0 )
 			break;
 		if( n < 0 ) {
