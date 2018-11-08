@@ -3,6 +3,9 @@
 Name "Cocaine Diesel"
 Outfile "CocaineDieselInstaller.exe"
 
+!define MUI_ICON "icon.ico"
+!define MUI_UNICON "icon.ico"
+
 InstallDir "$PROGRAMFILES64\Cocaine Diesel"
 RequestExecutionLevel admin
 
@@ -30,7 +33,7 @@ Section "Install" SectionInstall
 	SetRegView 64
 	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel" "DisplayName" "Cocaine Diesel"
 	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel" "UninstallString" "$INSTDIR\uninstall.exe"
-	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel" "DisplayIcon" "$INSTDIR\client.exe"
+	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel" "DisplayIcon" "$INSTDIR\uninstall.exe"
 	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel" "Publisher" "Aha Cheers"
 	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel" "DisplayVersion" "0.0.0.0"
 	WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel" "NoModify" 1
