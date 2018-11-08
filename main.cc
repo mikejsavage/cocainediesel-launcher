@@ -846,7 +846,7 @@ int main( int argc, char ** argv ) {
 			| ImGuiWindowFlags_NoScrollWithMouse
 		);
 
-		ImGui::Image( ( void * ) tex, ImVec2( 750, 256 ) );
+		ImGui::Image( ( void * ) checked_cast< uptr >( tex ), ImVec2( 750, 256 ) );
 
 		ImGui::End();
 
