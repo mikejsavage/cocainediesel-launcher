@@ -1,9 +1,9 @@
 !include "MUI2.nsh"
 
-Name "Medfall"
-Outfile "MedfallInstaller.exe"
+Name "Cocaine Diesel"
+Outfile "CocaineDieselInstaller.exe"
 
-InstallDir "$PROGRAMFILES64\Medfall"
+InstallDir "$PROGRAMFILES64\Cocaine Diesel"
 RequestExecutionLevel admin
 
 !insertmacro MUI_PAGE_DIRECTORY
@@ -14,55 +14,52 @@ RequestExecutionLevel admin
 Section "Install" SectionInstall
 	# Install stuff
 	SetOutPath $INSTDIR
-	File release\launch.exe
+	File release\cocainediesel.exe
 	File release\elevate_for_update.exe
 
 	# Start menu shortcut
-	CreateDirectory "$SMPROGRAMS\Medfall"
-	CreateShortCut "$SMPROGRAMS\Medfall\Medfall.lnk" "$INSTDIR\launch.exe"
+	CreateDirectory "$SMPROGRAMS\Cocaine Diesel"
+	CreateShortCut "$SMPROGRAMS\Cocaine Diesel\Cocaine Diesel.lnk" "$INSTDIR\cocainediesel.exe"
 
 	# Uninstaller
 	WriteUninstaller "$INSTDIR\uninstall.exe"
 
 	# Registry keys
 	SetRegView 64
-	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Medfall" "DisplayName" "Medfall"
-	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Medfall" "UninstallString" "$INSTDIR\uninstall.exe"
-	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Medfall" "DisplayIcon" "$INSTDIR\logo.ico"
-	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Medfall" "Publisher" "Medfall Yes Son"
-	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Medfall" "DisplayVersion" "0.0.0.0"
-	WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Medfall" "NoModify" 1
-	WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Medfall" "NoRepair" 1
+	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel" "DisplayName" "Cocaine Diesel"
+	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel" "UninstallString" "$INSTDIR\uninstall.exe"
+	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel" "DisplayIcon" "$INSTDIR\client.exe"
+	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel" "Publisher" "Aha Cheers"
+	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel" "DisplayVersion" "0.0.0.0"
+	WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel" "NoModify" 1
+	WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel" "NoRepair" 1
 	
 	SectionGetSize ${SectionInstall} $0
 	IntFmt $1 "0x%08X" $0
-	WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Medfall" "EstimatedSize" $1
+	WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel" "EstimatedSize" $1
 SectionEnd
 
 Section "Uninstall"
 	# Files
-	Delete "$INSTDIR\medfall.exe"
-	Delete "$INSTDIR\launch.exe"
-	Delete "$INSTDIR\launch.exe.old"
+	Delete "$INSTDIR\client.exe"
+	Delete "$INSTDIR\SDL2.dll"
+	Delete "$INSTDIR\server.exe"
+	Delete "$INSTDIR\cocainediesel.exe"
+	Delete "$INSTDIR\cocainediesel.exe.old"
 	Delete "$INSTDIR\elevate_for_update.exe"
 	Delete "$INSTDIR\uninstall.exe"
 	Delete "$INSTDIR\version.txt"
 	Delete "$INSTDIR\manifest.txt"
 
-	Delete "$INSTDIR\LiberationSans-Regular.ttf"
-
-	RMDir /r "$INSTDIR\logs"
-	RMDir /r "$INSTDIR\models"
-	RMDir /r "$INSTDIR\shaders"
-	RMDir /r "$INSTDIR\terrains"
-	RMDir /r "$INSTDIR\update"
+	RMDir /r "$INSTDIR\base"
+	RMDir /r "$INSTDIR\libs"
 	RMDir "$INSTDIR"
 
 	# Start menu shortcut
-	Delete "$SMPROGRAMS\Medfall\Medfall.lnk"
-	RMDir "$SMPROGRAMS\Medfall"
+	Delete "$SMPROGRAMS\Cocaine Diesel\Cocaine Diesel.lnk"
+	RMDir "$SMPROGRAMS\Cocaine Diesel"
 
 	# Registry keys
 	SetRegView 64
-	DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Medfall"
+	DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel"
 SectionEnd
