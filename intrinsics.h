@@ -83,60 +83,8 @@ char ( &ArrayCountObj( const T ( & )[ N ] ) )[ N ];
 #define gigabytes( gb ) ( megabytes( gb ) * size_t( 1024 ) )
 
 template< typename T >
-void swap( T & a, T & b ) {
-	T t = a;
-	a = b;
-	b = t;
-}
-
-template< typename T >
 constexpr T min( T a, T b ) {
 	return a < b ? a : b;
-}
-
-template< typename T >
-constexpr T min( T a, T b, T c ) {
-	return min( min( a, b ), c );
-}
-
-template< typename T >
-constexpr T min( T a, T b, T c, T d ) {
-	return min( min( min( a, b ), c ), d );
-}
-
-template< typename T >
-constexpr T max( T a, T b ) {
-	return a > b ? a : b;
-}
-
-template< typename T >
-constexpr T max( T a, T b, T c ) {
-	return max( max( a, b ), c );
-}
-
-template< typename T >
-constexpr T max( T a, T b, T c, T d ) {
-	return max( max( max( a, b ), c ), d );
-}
-
-template< typename T >
-constexpr T abs( T x ) {
-	return x > 0 ? x : -x;
-}
-
-template< typename T >
-constexpr T clamp( T x, T lo, T hi ) {
-	return x < lo ? lo : ( x > hi ? hi : x );
-}
-
-template< typename T >
-constexpr T saturate( T x ) {
-	return clamp( x, T( 0 ), T( 1 ) );
-}
-
-template< typename T >
-constexpr T clamp11( T x ) {
-	return clamp( x, T( -1 ), T( 1 ) );
 }
 
 #define NONCOPYABLE( T ) T( const T & ) = delete; void operator=( const T & ) = delete;
@@ -195,19 +143,7 @@ inline u8 * file_get_contents( const char * path, size_t * out_len = NULL ) {
 }
 
 template< typename T >
-inline T * malloc_array( size_t count ) {
-	ASSERT( SIZE_MAX / count >= sizeof( T ) );
-	return ( T * ) malloc( count * sizeof( T ) );
-}
-
-template< typename T >
 inline T * realloc_array( T * old, size_t count ) {
 	ASSERT( SIZE_MAX / count >= sizeof( T ) );
 	return ( T * ) realloc( old, count * sizeof( T ) );
-}
-
-template< typename T >
-static T lerp( T a, float t, T b ) {
-	ASSERT( t >= 0.0f && t <= 1.0f );
-	return a * ( 1.0f - t ) + b * t;
 }

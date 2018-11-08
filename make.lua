@@ -24,7 +24,7 @@ bin( "cocainediesel", {
 	},
 
 	libs = { "glfw", "imgui", "monocypher", "stb_image", "stb_truetype", "whereami" },
-	prebuilt_libs = prebuild_libs,
+	prebuilt_libs = prebuilt_libs,
 
 	rc = "cocainediesel_manifest",
 

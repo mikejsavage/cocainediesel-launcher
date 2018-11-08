@@ -5,8 +5,6 @@
 #include <unordered_map>
 #include <algorithm>
 
-#include <curl/curl.h>
-
 #include "intrinsics.h"
 #include "log.h"
 #include "gl.h"
@@ -29,6 +27,12 @@
 #include "libs/monocypher/monocypher.h"
 
 #include "libs/whereami/whereami.h"
+
+#if PLATFORM_WINDOWS
+#include "libs/curl/curl.h"
+#else
+#include <curl/curl.h>
+#endif
 
 #if PLATFORM_WINDOWS
 #define GAME_BINARY "client.exe"
@@ -90,7 +94,7 @@ static bool operator!=( const Blake2b256 & a, const Blake2b256 & b ) {
 }
 
 static void format( FormatBuffer * fb, const Blake2b256 & h, const FormatOpts & opts ) {
-	str< h.digest.size() * 2 + 1 > s;
+	str< BLAKE2B256_DIGEST_LENGTH * 2 + 1 > s;
 	static const char hex[] = "0123456789abcdef";
 	for( u8 b : h.digest ) {
 		s += hex[ b >> 4 ];
@@ -742,7 +746,8 @@ static void step_updater( double now ) {
 				return;
 
 			// TODO: handle error
-			ggprint_to_file( version_txt, "{}\n", updater.remote_version );
+			str< 128 > version_str( "{}", updater.remote_version );
+			fwrite( version_str.c_str(), 1, version_str.len(), version_txt );
 			fclose( version_txt );
 
 			LOG( "Writing manifest.txt" );

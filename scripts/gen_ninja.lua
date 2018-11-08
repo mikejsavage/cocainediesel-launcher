@@ -331,10 +331,18 @@ automatically_print_output_at_exit = setmetatable( { }, {
 		end
 
 		for bin_name, cfg in pairs( bins ) do
+			local srcs = { cfg.srcs }
+
+			if OS == "windows" and cfg.rc then
+				srcs = { cfg.srcs, cfg.rc }
+				printf( "build %s/%s%s: rc %s.rc %s.xml", dir, cfg.rc, obj_suffix, cfg.rc, cfg.rc )
+				printf( "    in_rc = %s.rc", cfg.rc )
+			end
+
 			local bin_path = ( "%s%s%s" ):format( bin_prefix, bin_name, bin_suffix )
 			printf( "build %s: bin %s %s %s",
 				bin_path,
-				join( cfg.srcs, obj_suffix ),
+				join( srcs, obj_suffix ),
 				join( cfg.libs, lib_suffix, lib_prefix ),
 				joinpb( cfg.prebuilt_libs, lib_suffix, lib_prefix )
 			)
@@ -346,11 +354,6 @@ automatically_print_output_at_exit = setmetatable( { }, {
 			end
 			if cfg[ extra_ldflags_key ] then
 				printf( "    extra_ldflags = %s", cfg[ extra_ldflags_key ] )
-			end
-
-			if OS == "windows" and cfg.rc then
-				printf( "build %s/%s%s: rc %s.rc %s.xml", dir, cfg.rc, obj_suffix, cfg.rc, cfg.rc )
-				printf( "    in_rc = %s.rc", cfg.rc )
 			end
 
 			printf( "default %s", bin_path )
