@@ -26,6 +26,13 @@ bin( "cocainediesel", {
 	gcc_extra_ldflags = "-lX11 -lcurl",
 } )
 
+if OS == "windows" then
+        bin( "elevate_for_update", {
+		srcs = { "elevate_for_update.cc", "ggformat.cc" },
+		rc = "elevate_for_update_manifest",
+	} )
+end
+
 if config == "release" then
 	return
 end
