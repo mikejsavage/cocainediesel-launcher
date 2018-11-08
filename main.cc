@@ -861,10 +861,12 @@ int main( int argc, char ** argv ) {
 	}
 
 	double last_frame_time = glfwGetTime();
-	while( !glfwWindowShouldClose( window ) )
-	{
-		// glfwWaitEventsTimeout( 1.1 );
-		glfwPollEvents();
+	while( !glfwWindowShouldClose( window ) ) {
+		if( updater.state == UpdaterState_NeedsUpdate || updater.state == UpdaterState_ReadyToPlay )
+			glfwWaitEvents();
+		else
+			glfwPollEvents();
+
 		ImGui_ImplGlfwGL3_NewFrame();
 
 		double now = glfwGetTime();
