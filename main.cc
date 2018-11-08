@@ -907,7 +907,7 @@ int main( int argc, char ** argv ) {
 #if PLATFORM_WINDOWS
 				exec_and_quit( "elevate_for_update.exe" );
 #else
-				updater.state == UpdaterState_StartUpdate;
+				updater.state = UpdaterState_StartUpdate;
 #endif
 			}
 		}
