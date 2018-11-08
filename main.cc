@@ -666,14 +666,18 @@ static void step_updater( double now ) {
 
 		case UpdaterState_DownloadingUpdate: {
 			bool all_done = true;
+			bool any_failed = false;
 			for( const Download & dl : updater.downloads ) {
 				if( dl.state == DownloadState_Downloading ) {
 					all_done = false;
-					break;
+				}
+				if( dl.state == DownloadState_Failed ) {
+					any_failed = true;
 				}
 			}
 
-			if( all_done ) {
+			// TODO: retry
+			if( all_done && !any_failed ) {
 				updater.state = UpdaterState_InstallingUpdate;
 			}
 		} break;
@@ -683,6 +687,24 @@ static void step_updater( double now ) {
 
 			// TODO: make dirs/preallocate space before downloading
 			// TODO: finish the error checking
+
+			// verify checksums
+			// TODO: should retry downloads a few times before failing
+			// TODO: should save the downloads that did succeed too
+			for( size_t i = 0; i < updater.downloads.size(); i++ ) {
+				const std::string & file_name = updater.files_to_update[ i ];
+				LOG( "Verifying {}", file_name );
+
+				Blake2b256 checksum( updater.downloads[ i ].body.c_str(), updater.downloads[ i ].body.size() );
+
+				ggprint( "{} {}\n", checksum, updater.remote_manifest[ file_name ].checksum );
+				if( checksum != updater.remote_manifest[ file_name ].checksum ) {
+					LOG( "Incorrect checksum for {}", file_name );
+					updater = Updater();
+					updater.retry_at = now + 5;
+					return;
+				}
+			}
 
 			std::vector< std::string > update_dirs;
 
