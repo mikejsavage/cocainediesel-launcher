@@ -6,6 +6,8 @@ Outfile "CocaineDieselInstaller.exe"
 InstallDir "$PROGRAMFILES64\Cocaine Diesel"
 RequestExecutionLevel admin
 
+SetCompressor lzma
+
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_UNPAGE_CONFIRM
