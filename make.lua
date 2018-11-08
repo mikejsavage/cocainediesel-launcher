@@ -37,18 +37,19 @@ if config == "release" then
 	return
 end
 
-if io.open( "secret_key.h" ) then
-	bin( "b2sum", {
-		srcs = { "b2sum.cc", "ggformat.cc" },
-		libs = { "monocypher" },
-	} )
-	gcc_obj_cxxflags( "b2sum.cc", "-O2" )
-	msvc_obj_cxxflags( "b2sum.cc", "/O2" )
+bin( "genkeys", {
+	srcs = { "genkeys.cc", "ggformat.cc" },
+	libs = { "monocypher" }
+} )
 
-	bin( "genkeys", {
-		srcs = { "genkeys.cc", "ggformat.cc" },
-		libs = { "monocypher" }
-	} )
+bin( "b2sum", {
+	srcs = { "b2sum.cc", "ggformat.cc" },
+	libs = { "monocypher" },
+} )
+gcc_obj_cxxflags( "b2sum.cc", "-O2" )
+msvc_obj_cxxflags( "b2sum.cc", "/O2" )
+
+if io.open( "secret_key.h" ) then
 	bin( "sign", {
 		srcs = { "sign.cc", "ggformat.cc" },
 		libs = { "monocypher" }
