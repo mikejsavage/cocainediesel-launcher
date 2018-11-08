@@ -225,7 +225,11 @@ function bin_ldflags( bin_name, ldflags )
 end
 
 function obj_cxxflags( src_name, cxxflags )
-	objs[ src_name ].extra_cxxflags = ( objs[ src_name ].extra_cxxflags or "" ) .. " " .. cxxflags
+	for name, cfg in pairs( objs ) do
+		if name:match( src_name ) then
+			cfg.extra_cxxflags = ( cfg.extra_cxxflags or "" ) .. " " .. cxxflags
+		end
+	end
 end
 
 function obj_replace_cxxflags( src_name, cxxflags )
@@ -258,40 +262,19 @@ printf( "ldflags = %s", ldflags )
 if toolchain == "msvc" then
 
 printf( [[
-VC = ${ProgramFiles(x86)}\Microsoft Visual Studio 14.0\VC
-KIT81 = ${ProgramFiles(x86)}\Windows Kits\8.1
-KIT10 = ${ProgramFiles(x86)}\Windows Kits\10
-DX = ${ProgramFiles(x86)}\Microsoft DirectX SDK (June 2010)
+rule cpp
+    command = cl /showIncludes $cxxflags $extra_cxxflags -Fo$out $in
+    deps = msvc
 
-export INCLUDE := $(VC)\include;$(KIT10)\Include\10.0.10240.0\ucrt;$(KIT81)\Include\shared;$(DX)\Include;$(KIT81)\Include\um;$(KIT81)\Include\winrt
-export LIB := $(VC)\lib\amd64;$(KIT10)\Lib\10.0.10240.0\ucrt\x64;$(KIT81)\lib\winv6.3\um\x64
-export PATH := /cygdrive/c/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin/amd64/:/cygdrive/c/Program Files (x86)/Windows Kits/8.1/bin/x64/:$(PATH)
-]] )
+rule bin
+    command = cl -Fe$out $in $ldflags $extra_ldflags
 
-printf( [[
-$(BINS): %%:
-	@printf "\033[1;31mbuilding $@\033[0m\n"
-	@mkdir -p "$(@D)"
-	@cl -Fe$@ $^ $(LDFLAGS)
+rule lib
+    command = lib -OUT:$out $in
+
+rule rc
+    command = $cpp -c -x c++ /dev/null -o $out
 ]] )
-printf( [[
-%s/%%%s: %%.cc
-	@printf "\033[1;32mbuilding $<\033[0m\n"
-	@mkdir -p "$(@D)"
-	@cl $(CXXFLAGS) -Fo$@ $^
-]], dir, obj_suffix )
-printf( [[
-$(OBJS): %%:
-	@printf "\033[1;32mbuilding $<\033[0m\n"
-	@mkdir -p "$(@D)"
-	@cl $(CXXFLAGS) -Fo$@ -Tp$<
-]] )
-printf( [[
-%%%s:
-	@printf "\033[1;35mbuilding $@\033[0m\n"
-	@mkdir -p "$(@D)"
-	@lib -OUT:$@ $^
-]], lib_suffix )
 
 elseif toolchain == "gcc" then
 
@@ -322,19 +305,6 @@ rule rc
 ]], "gcc", cxx )
 
 end
-
--- function bin( bin_name, srcs, libs )
--- 	assert( type( srcs ) == "table", "srcs should be a table" )
--- 	assert( not libs or type( libs ) == "table", "libs should be a table or nil" )
--- 	local bin_path = ( "%s%s%s" ):format( bin_prefix, bin_name, bin_suffix )
--- 	printh( "default %s", bin_path )
--- 	printf( "build %s: bin %s %s", bin_path, join( srcs, obj_suffix ), join( libs, lib_suffix, lib_prefix ) )
--- end
---
--- function lib( lib_name, srcs )
--- 	assert( type( srcs ) == "table", "srcs should be a table" )
--- 	printf( "build %s/%s%s%s: lib %s", dir, lib_prefix, lib_name, lib_suffix, join( srcs, obj_suffix ) )
--- end
 
 local function rule_for_src( src_name )
 	local ext = src_name:match( "([^%.]+)$" )
