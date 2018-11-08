@@ -22,11 +22,11 @@ local configs = {
 	[ "windows-64" ] = { },
 
 	[ "windows-debug" ] = {
-		cxxflags = "/Od /MTd /Z7 /Zo",
-		ldflags = "/Od /MTd /Z7 /Zo",
+		cxxflags = "/Od /MDd /Z7 /Zo",
+		ldflags = "/Od /MDd /Z7 /Zo",
 	},
 	[ "windows-release" ] = {
-		cxxflags = "/O2 /MT /DRELEASE_BUILD",
+		cxxflags = "/O2 /MD /DRELEASE_BUILD",
 		bin_prefix = "release/",
 	},
 

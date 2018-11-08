@@ -29,6 +29,7 @@
 #include "libs/whereami/whereami.h"
 
 #if PLATFORM_WINDOWS
+#define CURL_STATICLIB
 #include "libs/curl/curl.h"
 #else
 #include <curl/curl.h>
