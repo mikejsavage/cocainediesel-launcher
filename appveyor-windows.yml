@@ -10,4 +10,5 @@ build_script:
 
 artifacts:
 - path: installer/CocaineDieselInstaller.exe
+- path: release
   name: cocaine_diesel_windows
