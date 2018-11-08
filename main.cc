@@ -267,6 +267,7 @@ enum UpdaterState {
 	UpdaterState_DownloadingManifest_Retry,
 
 	UpdaterState_NeedsUpdate,
+	UpdaterState_StartUpdate,
 
 	// UpdaterState_ReservingSpace,
 
@@ -427,7 +428,7 @@ static bool change_directory( const char * path ) {
 }
 
 static bool make_directory( const char * path ) {
-	bool ok = CreateDirectoryA( path, NULL ) != 0;
+	bool ok = CreateDirectoryA( path, NULL ) != 0 || GetLastError() == ERROR_ALREADY_EXISTS;
 	if( !ok )
 		LOGERROR( "Couldn't create directory {}", path );
 	return ok;
@@ -621,7 +622,7 @@ static void step_updater( double now ) {
 						updater.game_size += kv.second.file_size;
 					}
 
-					updater.state = UpdaterState_NeedsUpdate;
+					updater.state = autostart_update ? UpdaterState_StartUpdate : UpdaterState_NeedsUpdate;
 					updater.downloads.erase( updater.downloads.begin() );
 					break;
 				}
@@ -651,6 +652,16 @@ static void step_updater( double now ) {
 			break;
 
 		case UpdaterState_NeedsUpdate:
+			break;
+
+		case UpdaterState_StartUpdate:
+			updater.downloads.reserve( updater.files_to_update.size() );
+			for( size_t i = 0; i < updater.files_to_update.size(); i++ ) {
+				str< 256 > url( HOST "/{}", updater.remote_manifest[ updater.files_to_update[ i ] ].checksum );
+				download( url.c_str() );
+			}
+
+			updater.state = UpdaterState_DownloadingUpdate;
 			break;
 
 		case UpdaterState_DownloadingUpdate: {
@@ -896,13 +907,7 @@ int main( int argc, char ** argv ) {
 #if PLATFORM_WINDOWS
 				exec_and_quit( "elevate_for_update.exe" );
 #else
-				updater.downloads.reserve( updater.files_to_update.size() );
-				for( size_t i = 0; i < updater.files_to_update.size(); i++ ) {
-					str< 256 > url( HOST "/{}", updater.remote_manifest[ updater.files_to_update[ i ] ].checksum );
-					download( url.c_str() );
-				}
-
-				updater.state = UpdaterState_DownloadingUpdate;
+				updater.state == UpdaterState_StartUpdate;
 #endif
 			}
 		}
