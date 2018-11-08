@@ -14,8 +14,8 @@ RequestExecutionLevel admin
 Section "Install" SectionInstall
 	# Install stuff
 	SetOutPath $INSTDIR
-	File release\cocainediesel.exe
-	File release\elevate_for_update.exe
+	File ..\release\cocainediesel.exe
+	File ..\release\elevate_for_update.exe
 
 	# Start menu shortcut
 	CreateDirectory "$SMPROGRAMS\Cocaine Diesel"
