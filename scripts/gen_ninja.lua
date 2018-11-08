@@ -337,7 +337,7 @@ end
 -- end
 
 local function rule_for_src( src_name )
-	local ext = src_name:match( "%.(.+)$" )
+	local ext = src_name:match( "([^%.]+)$" )
 	return ( { cc = "cpp", m = "m" } )[ ext ]
 end
 
