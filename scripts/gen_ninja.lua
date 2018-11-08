@@ -312,7 +312,7 @@ rule m
     deps = gcc
 
 rule bin
-    command = $cpp $ldflags $extra_ldflags -o $out $in
+    command = $cpp -o $out $in $ldflags $extra_ldflags
 
 rule lib
     command = ar rs $out $in
