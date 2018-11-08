@@ -1,6 +1,9 @@
 version: "{build}"
 clone_depth: 1
 
+environment:
+  PATH: %Program Files (x86)%\Microsoft Visual Studio 14.0\VC\bin\amd64;%Program Files (x86)%\Windows Kits\10\bin\10.0.16299.0\x64
+
 build_script:
 - cmd: scripts\lua.exe make.lua release > build.ninja
 - cmd: scripts\ninja.exe -v -k 0
