@@ -875,11 +875,13 @@ int main( int argc, char ** argv ) {
 
 		step_updater( now );
 
+		float logo_height = 256;
+
 		v2u32 window_size = get_window_size();
 		ImGui::GetStyle().WindowPadding = ImVec2( 0, 0 );
 		ImGui::SetNextWindowPos( ImVec2() );
-		ImGui::SetNextWindowSize( ImVec2( window_size.x, window_size.y ) );
-		ImGui::Begin( "", NULL, 0
+		ImGui::SetNextWindowSize( ImVec2( window_size.x, logo_height ) );
+		ImGui::Begin( "logo", NULL, 0
 			| ImGuiWindowFlags_NoTitleBar
 			| ImGuiWindowFlags_NoResize
 			| ImGuiWindowFlags_NoMove
@@ -888,14 +890,14 @@ int main( int argc, char ** argv ) {
 			| ImGuiWindowFlags_NoScrollWithMouse
 		);
 
-		ImGui::Image( ( void * ) checked_cast< uptr >( tex ), ImVec2( 750, 256 ) );
+		ImGui::Image( ( void * ) checked_cast< uptr >( tex ), ImVec2( 750, logo_height ) );
 
 		ImGui::End();
 
 		ImGui::GetStyle().WindowPadding = ImVec2( 32, 16 );
-		ImGui::SetNextWindowPos( ImVec2( 0, 256 ) );
-		ImGui::SetNextWindowSize( ImVec2( window_size.x, window_size.y - 256 ) );
-		ImGui::Begin( "what", NULL, 0
+		ImGui::SetNextWindowPos( ImVec2( 0, logo_height ) );
+		ImGui::SetNextWindowSize( ImVec2( window_size.x, window_size.y - logo_height ) );
+		ImGui::Begin( "controls", NULL, 0
 			| ImGuiWindowFlags_NoTitleBar
 			| ImGuiWindowFlags_NoResize
 			| ImGuiWindowFlags_NoMove
@@ -904,7 +906,7 @@ int main( int argc, char ** argv ) {
 			| ImGuiWindowFlags_NoScrollWithMouse
 		);
 
-		ImGui::Text( "v%u.%u.%u.%u", updater.local_version.a, updater.local_version.b, updater.local_version.c, updater.local_version.d );
+		ImGui::Text( "v%hhu.%hhu.%hhu.%hhu", updater.local_version.a, updater.local_version.b, updater.local_version.c, updater.local_version.d );
 
 		ImGui::PushFont( large );
 		if( updater.state == UpdaterState_ReadyToPlay ) {
