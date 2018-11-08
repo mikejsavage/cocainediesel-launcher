@@ -1,17 +1,15 @@
-#include <sys/random.h>
-
 #include <stdio.h>
 
 #include "intrinsics.h"
 #include "log.h"
+#include "ggentropy.h"
+
 #include "libs/monocypher/monocypher.h"
 
 int main( int argc, char ** argv ) {
 	u8 secret_key[ 32 ];
-	int ok = getentropy( secret_key, sizeof( secret_key ) );
-	if( ok == -1 ) {
-		FATAL( "getentropy" );
-	}
+	if( !ggentropy( secret_key, sizeof( secret_key ) ) )
+		FATAL( "ggentropy" );
 
 	u8 public_key[ 32 ];
 	crypto_sign_public_key( public_key, secret_key );

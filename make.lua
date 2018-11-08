@@ -38,7 +38,7 @@ if config == "release" then
 end
 
 bin( "genkeys", {
-	srcs = { "genkeys.cc", "ggformat.cc" },
+	srcs = { "genkeys.cc", "ggformat.cc", "ggentropy.cc" },
 	libs = { "monocypher" }
 } )
 
