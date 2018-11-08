@@ -832,6 +832,8 @@ int main( int argc, char ** argv ) {
 
 	ImGui_ImplGlfwGL3_Init( window, true );
 
+	glfwSwapInterval( 2 );
+
 	u32 tex = load_png_memory( logo, sizeof( logo ) );
 
 	ImFont * small;
