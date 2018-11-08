@@ -21,7 +21,12 @@
 
 #include <stddef.h>
 
+#include "platform.h"
 #include "array.h"
+
+#if PLATFORM_WINDOWS && !defined( ssize_t )
+#define ssize_t long long
+#endif
 
 #define MAXCAPTURES	32	/* Max no. of allowed captures in pattern */
 #define MAXCCALLS	200	/* Max recusion depth in pattern matching */
