@@ -697,7 +697,6 @@ static void step_updater( double now ) {
 
 				Blake2b256 checksum( updater.downloads[ i ].body.c_str(), updater.downloads[ i ].body.size() );
 
-				ggprint( "{} {}\n", checksum, updater.remote_manifest[ file_name ].checksum );
 				if( checksum != updater.remote_manifest[ file_name ].checksum ) {
 					LOG( "Incorrect checksum for {}", file_name );
 					updater = Updater();
