@@ -10,4 +10,4 @@ build_script:
 
 artifacts:
 - path: release
-  name: cocaine_diesel_linux
+  name: launcher_linux
