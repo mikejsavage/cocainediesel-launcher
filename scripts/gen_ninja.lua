@@ -168,6 +168,19 @@ local function join( names, suffix, prefix )
 	return table.concat( flat, " " )
 end
 
+local function joinpb( names, suffix, prefix )
+	if not names then
+		return ""
+	end
+
+	prefix = prefix or ""
+	local flat = flatten( names )
+	for i = 1, #flat do
+		flat[ i ] = "libs/" .. flat[ i ] .. "/" .. triple .. "/" .. prefix .. flat[ i ] .. suffix
+	end
+	return table.concat( flat, " " )
+end
+
 local function printf( form, ... )
 	print( form:format( ... ) )
 end
@@ -184,17 +197,15 @@ local function add_srcs( srcs )
 	end
 end
 
-function bin( bin_name, srcs, libs )
-	assert( type( srcs ) == "table", "srcs should be a table" )
-	assert( not libs or type( libs ) == "table", "libs should be a table or nil" )
+function bin( bin_name, cfg )
+	assert( type( cfg ) == "table", "cfg should be a table" )
+	assert( type( cfg.srcs ) == "table", "cfg.srcs should be a table" )
+	assert( not cfg.libs or type( cfg.libs ) == "table", "cfg.libs should be a table or nil" )
 	assert( not bins[ bin_name ] )
 
-	bins[ bin_name ] = {
-		srcs = srcs,
-		libs = libs,
-	}
+	bins[ bin_name ] = cfg
 
-	add_srcs( srcs )
+	add_srcs( cfg.srcs )
 end
 
 function lib( lib_name, srcs )
@@ -218,10 +229,6 @@ function rc( rc_name )
 		local cxx = rightmost( "cxx" )
 		printf( "build %s/%s%s: rc", dir, rc_name, obj_suffix )
 	end
-end
-
-function bin_ldflags( bin_name, ldflags )
-	bins[ bin_name ].extra_ldflags = ( bins[ bin_name ].extra_ldflags or "" ) .. " " .. ldflags
 end
 
 function obj_cxxflags( src_name, cxxflags )
@@ -248,11 +255,9 @@ local function toolchain_helper( t, f )
 	end
 end
 
-msvc_bin_ldflags = toolchain_helper( "msvc", bin_ldflags )
 msvc_obj_cxxflags = toolchain_helper( "msvc", obj_cxxflags )
 msvc_obj_replace_cxxflags = toolchain_helper( "msvc", obj_replace_cxxflags )
 
-gcc_bin_ldflags = toolchain_helper( "gcc", bin_ldflags )
 gcc_obj_cxxflags = toolchain_helper( "gcc", obj_cxxflags )
 gcc_obj_replace_cxxflags = toolchain_helper( "gcc", obj_replace_cxxflags )
 
@@ -273,7 +278,7 @@ rule lib
     command = lib -OUT:$out $in
 
 rule rc
-    command = $cpp -c -x c++ /dev/null -o $out
+    command = rc /fo$out /nologo $in_rc
 ]] )
 
 elseif toolchain == "gcc" then
@@ -299,9 +304,6 @@ rule bin
 
 rule lib
     command = ar rs $out $in
-
-rule rc
-    command = $cpp -c -x c++ /dev/null -o $out
 ]], "gcc", cxx )
 
 end
@@ -330,13 +332,27 @@ automatically_print_output_at_exit = setmetatable( { }, {
 
 		for bin_name, cfg in pairs( bins ) do
 			local bin_path = ( "%s%s%s" ):format( bin_prefix, bin_name, bin_suffix )
-			printf( "build %s: bin %s %s", bin_path, join( cfg.srcs, obj_suffix ), join( cfg.libs, lib_suffix, lib_prefix ) )
-			if cfg.ldflags then
-				printf( "    ldflags = %s", cfg.ldflags )
+			printf( "build %s: bin %s %s %s",
+				bin_path,
+				join( cfg.srcs, obj_suffix ),
+				join( cfg.libs, lib_suffix, lib_prefix ),
+				joinpb( cfg.prebuilt_libs, lib_suffix, lib_prefix )
+			)
+
+			local ldflags_key = toolchain .. "_ldflags"
+			local extra_ldflags_key = toolchain .. "_extra_ldflags"
+			if cfg[ ldflags_key ] then
+				printf( "    ldflags = %s", cfg[ ldflags_key ] )
 			end
-			if cfg.extra_ldflags then
-				printf( "    extra_ldflags = %s", cfg.extra_ldflags )
+			if cfg[ extra_ldflags_key ] then
+				printf( "    extra_ldflags = %s", cfg[ extra_ldflags_key ] )
 			end
+
+			if OS == "windows" and cfg.rc then
+				printf( "build %s/%s%s: rc %s.rc %s.xml", dir, cfg.rc, obj_suffix, cfg.rc, cfg.rc )
+				printf( "    in_rc = %s.rc", cfg.rc )
+			end
+
 			printf( "default %s", bin_path )
 		end
 	end

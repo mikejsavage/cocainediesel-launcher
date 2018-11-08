@@ -6,33 +6,50 @@ require( "libs/monocypher" )
 require( "libs/stb" )
 require( "libs/whereami" )
 
-local game_ldflags = "-lX11 -lcurl"
+local gcc_ldflags = "-lX11 -lcurl"
+local prebuild_libs
 
-if OS == "macos" then
-	game_ldflags = "-framework Cocoa -framework CoreVideo -framework IOKit"
+if OS == "windows" then
+	prebuilt_libs = { "curl" }
 end
 
-local srcs = {
-	"main.cc", -- "cocainediesel_manifest.cc",
-	"ggformat.cc", "strlcpy.cc", "strtonum.cc", "patterns.cc",
-	"gl.cc", "glad.cc", "liberation.cc", "png.cc",
-}
-local libs = { "glfw", "imgui", "monocypher", "stb_image", "stb_truetype", "whereami" }
+if OS == "macos" then
+	gcc_ldflags = "-framework Cocoa -framework CoreVideo -framework IOKit"
+end
 
-bin( "cocainediesel", srcs, libs )
-msvc_bin_ldflags( "cocainediesel", "opengl32.lib gdi32.lib Ws2_32.lib" )
-rc( "cocainediesel_manifest" )
-gcc_bin_ldflags( "cocainediesel", game_ldflags )
+bin( "cocainediesel", {
+	srcs = {
+		"main.cc", "ggformat.cc", "strlcpy.cc", "strtonum.cc", "patterns.cc",
+		"gl.cc", "glad.cc", "liberation.cc", "png.cc",
+	},
+
+	libs = { "glfw", "imgui", "monocypher", "stb_image", "stb_truetype", "whereami" },
+	prebuilt_libs = prebuild_libs,
+
+	rc = "cocainediesel_manifest",
+
+	msvc_extra_ldflags = "opengl32.lib gdi32.lib Ws2_32.lib",
+	gcc_extra_ldflags = gcc_ldflags,
+} )
 
 if config == "release" then
 	return
 end
 
 if io.open( "secret_key.h" ) then
-	bin( "b2sum", { "b2sum.cc", "ggformat.cc" }, { "monocypher" } )
+	bin( "b2sum", {
+		srcs = { "b2sum.cc", "ggformat.cc" },
+		libs = { "monocypher" },
+	} )
 	gcc_obj_cxxflags( "b2sum.cc", "-O2" )
 	msvc_obj_cxxflags( "b2sum.cc", "/O2" )
 
-	bin( "genkeys", { "genkeys.cc", "ggformat.cc" }, { "monocypher" } )
-	bin( "sign", { "sign.cc", "ggformat.cc" }, { "monocypher" } )
+	bin( "genkeys", {
+		srcs = { "genkeys.cc", "ggformat.cc" },
+		libs = { "monocypher" }
+	} )
+	bin( "sign", {
+		srcs = { "sign.cc", "ggformat.cc" },
+		libs = { "monocypher" }
+	} )
 end
