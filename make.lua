@@ -6,11 +6,6 @@ require( "libs/monocypher" )
 require( "libs/stb" )
 require( "libs/whereami" )
 
-local prebuilt_libs
-if OS == "windows" then
-	prebuilt_libs = { "curl" }
-end
-
 bin( "cocainediesel", {
 	srcs = {
 		"main.cc", "ggformat.cc", "strlcpy.cc", "strtonum.cc", "patterns.cc",
@@ -18,12 +13,12 @@ bin( "cocainediesel", {
 	},
 
 	libs = { "glfw", "imgui", "monocypher", "stb_image", "stb_truetype", "whereami" },
-	prebuilt_libs = prebuilt_libs,
+	prebuilt_libs = { "curl" },
 
 	rc = "cocainediesel_manifest",
 
 	msvc_extra_ldflags = "opengl32.lib gdi32.lib Ws2_32.lib",
-	gcc_extra_ldflags = "-lX11 -lcurl",
+	gcc_extra_ldflags = "-lX11",
 } )
 
 if OS == "windows" then
