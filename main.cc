@@ -838,7 +838,6 @@ int main( int argc, char ** argv ) {
 
 	ImFont * small;
 	ImFont * large;
-	ImFont * verylarge;
 
 	{
 		u8 * data = LiberationSans_Regular_ttf;
@@ -850,7 +849,6 @@ int main( int argc, char ** argv ) {
 		io.Fonts->AddFontFromMemoryTTF( data, size, 16.0f, &config );
 		small = io.Fonts->AddFontFromMemoryTTF( data, size, 12.0f, &config );
 		large = io.Fonts->AddFontFromMemoryTTF( data, size, 32.0f, &config );
-		verylarge = io.Fonts->AddFontFromMemoryTTF( data, size, 128.0f, &config );
 	}
 
 	{
