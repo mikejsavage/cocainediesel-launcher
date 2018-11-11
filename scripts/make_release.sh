@@ -13,7 +13,7 @@ file_platform() {
 }
 
 # create manifest
-find * -type f -print0 | while IFS= read -r -d '' f; do
+find * -type f -print0 | sort -z | while IFS= read -r -d '' f; do
 	digest=$(../b2sum < "$f")
 	size=$(stat -c "%s" "$f")
 	platform=$(file_platform "$f")
