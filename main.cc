@@ -866,6 +866,8 @@ int main( int argc, char ** argv ) {
 		else
 			glfwPollEvents();
 
+		bool enter_key_pressed = glfwGetKey( window, GLFW_KEY_ENTER ) == GLFW_PRESS || glfwGetKey( window, GLFW_KEY_SPACE ) == GLFW_PRESS;
+
 		ImGui_ImplGlfwGL3_NewFrame();
 
 		double now = glfwGetTime();
@@ -915,7 +917,7 @@ int main( int argc, char ** argv ) {
 			bool launch = ImGui::Button( "Play", ImVec2( -1, 50 ) );
 			ImGui::PopStyleColor( 3 );
 
-			if( launch ) {
+			if( launch || enter_key_pressed ) {
 				exec_and_quit( GAME_BINARY );
 			}
 		}
@@ -928,7 +930,7 @@ int main( int argc, char ** argv ) {
 			bool update = ImGui::Button( button_text.c_str(), ImVec2( -1, 50 ) );
 			ImGui::PopStyleColor( 3 );
 
-			if( update ) {
+			if( update || enter_key_pressed ) {
 #if PLATFORM_WINDOWS
 				exec_and_quit( "elevate_for_update.exe" );
 #else
