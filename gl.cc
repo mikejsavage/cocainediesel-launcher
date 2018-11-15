@@ -132,11 +132,11 @@ GLFWwindow * gl_init() {
 	const GLFWvidmode * mode = glfwGetVideoMode( monitor );
 
 	glfwWindowHint( GLFW_CLIENT_API, GLFW_OPENGL_API );
-	glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
-	glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
-	glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 3 );
-	glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
-#if !RELEASE_BUILD
+	// glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
+	// glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
+	glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 2 );
+	glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 0 );
+#if !RELEASE_BUILD && 0
 	glfwWindowHint( GLFW_OPENGL_DEBUG_CONTEXT, 1 );
 #endif
 
@@ -189,7 +189,7 @@ GLFWwindow * gl_init() {
 		INFO( "{}: {}", exts[ i ].name, exts[ i ].enabled == 0 ? "missing" : "present" );
 	}
 
-#if !RELEASE_BUILD
+#if !RELEASE_BUILD && 0
 	bool nvidia_and_windows = false;
 #if PLATFORM_WINDOWS
 	if( strstr( vendor, "NVIDIA" ) ) {
