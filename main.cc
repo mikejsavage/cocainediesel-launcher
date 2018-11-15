@@ -859,6 +859,8 @@ int main( int argc, char ** argv ) {
 		ImGuiStyle & style = ImGui::GetStyle();
 		style.WindowRounding = 0;
 		style.FramePadding = ImVec2( 8, 8 );
+		style.FrameBorderSize = 0;
+		style.WindowBorderSize = 0;
 		style.Colors[ ImGuiCol_WindowBg ] = ImColor( 0x1a, 0x1a, 0x1a );
 		style.ItemSpacing.y = 8;
 	}
