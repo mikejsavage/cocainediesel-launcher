@@ -22,7 +22,8 @@
 #include "libs/glfw/include/GLFW/glfw3.h"
 
 #include "libs/imgui/imgui.h"
-#include "libs/imgui/imgui_impl_glfw_gl3.h"
+#include "libs/imgui/imgui_impl_glfw.h"
+#include "libs/imgui/imgui_impl_opengl2.h"
 
 #include "libs/monocypher/monocypher.h"
 
@@ -830,7 +831,10 @@ int main( int argc, char ** argv ) {
 
 	GLFWwindow * window = gl_init();
 
-	ImGui_ImplGlfwGL3_Init( window, true );
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL2_Init();
 
 	glfwSwapInterval( 2 );
 
@@ -868,7 +872,9 @@ int main( int argc, char ** argv ) {
 
 		bool enter_key_pressed = glfwGetKey( window, GLFW_KEY_ENTER ) == GLFW_PRESS || glfwGetKey( window, GLFW_KEY_SPACE ) == GLFW_PRESS;
 
-		ImGui_ImplGlfwGL3_NewFrame();
+		ImGui_ImplOpenGL2_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
 
 		double now = glfwGetTime();
 		double dt = now - last_frame_time;
@@ -910,9 +916,9 @@ int main( int argc, char ** argv ) {
 
 		ImGui::PushFont( large );
 		if( updater.state == UpdaterState_ReadyToPlay ) {
-			ImGui::PushStyleColor( ImGuiCol_Button, ImColor( 0x29, 0x8a, 0x67 ) );
-			ImGui::PushStyleColor( ImGuiCol_ButtonHovered, ImColor( 0x30, 0xa1, 0x78 ) );
-			ImGui::PushStyleColor( ImGuiCol_ButtonActive, ImColor( 0x38, 0xb9, 0x8a ) );
+			ImGui::PushStyleColor( ImGuiCol_Button, IM_COL32( 0x29, 0x8a, 0x67, 0xff ) );
+			ImGui::PushStyleColor( ImGuiCol_ButtonHovered, IM_COL32( 0x30, 0xa1, 0x78, 0xff ) );
+			ImGui::PushStyleColor( ImGuiCol_ButtonActive, IM_COL32( 0x38, 0xb9, 0x8a, 0xff ) );
 
 			bool launch = ImGui::Button( "Play", ImVec2( -1, 50 ) );
 			ImGui::PopStyleColor( 3 );
@@ -922,9 +928,9 @@ int main( int argc, char ** argv ) {
 			}
 		}
 		else if( updater.state == UpdaterState_NeedsUpdate ) {
-			ImGui::PushStyleColor( ImGuiCol_Button, ImColor( 0x29, 0x8a, 0x67 ) );
-			ImGui::PushStyleColor( ImGuiCol_ButtonHovered, ImColor( 0x30, 0xa1, 0x78 ) );
-			ImGui::PushStyleColor( ImGuiCol_ButtonActive, ImColor( 0x38, 0xb9, 0x8a ) );
+			ImGui::PushStyleColor( ImGuiCol_Button, IM_COL32( 0x29, 0x8a, 0x67, 0xff ) );
+			ImGui::PushStyleColor( ImGuiCol_ButtonHovered, IM_COL32( 0x30, 0xa1, 0x78, 0xff ) );
+			ImGui::PushStyleColor( ImGuiCol_ButtonActive, IM_COL32( 0x38, 0xb9, 0x8a, 0xff ) );
 
 			str< 256 > button_text( "Update to v{} - {.2}MB", updater.remote_version, updater.update_size / 1000.0 / 1000.0 );
 			bool update = ImGui::Button( button_text.c_str(), ImVec2( -1, 50 ) );
@@ -965,7 +971,7 @@ int main( int argc, char ** argv ) {
 
 			last_bytes_downloaded = updater.bytes_downloaded;
 
-			ImGui::PushStyleColor( ImGuiCol_PlotHistogram, ImColor( 0x29, 0x8a, 0x67 ) );
+			ImGui::PushStyleColor( ImGuiCol_PlotHistogram, IM_COL32( 0x29, 0x8a, 0x67, 0xff ) );
 
 			const char * unit = "KB/s";
 			double display_speed = latched_download_speed / 1000.0;
@@ -985,16 +991,16 @@ int main( int argc, char ** argv ) {
 			ImGui::PopStyleColor();
 		}
 		else if( updater.state == UpdaterState_InstallingUpdate ) {
-			ImGui::PushStyleColor( ImGuiCol_Button, ImColor( 0x1c, 0x2a, 0x59 ) );
-			ImGui::PushStyleColor( ImGuiCol_ButtonHovered, ImColor( 0x1c, 0x2a, 0x59 ) );
-			ImGui::PushStyleColor( ImGuiCol_ButtonActive, ImColor( 0x1c, 0x2a, 0x59 ) );
+			ImGui::PushStyleColor( ImGuiCol_Button, IM_COL32( 0x1c, 0x2a, 0x59, 0xff ) );
+			ImGui::PushStyleColor( ImGuiCol_ButtonHovered, IM_COL32( 0x1c, 0x2a, 0x59, 0xff ) );
+			ImGui::PushStyleColor( ImGuiCol_ButtonActive, IM_COL32( 0x1c, 0x2a, 0x59, 0xff ) );
 			ImGui::Button( "Installing update...", ImVec2( -1, 50 ) );
 			ImGui::PopStyleColor( 3 );
 		}
 		else {
-			ImGui::PushStyleColor( ImGuiCol_Button, ImColor( 0x1c, 0x2a, 0x59 ) );
-			ImGui::PushStyleColor( ImGuiCol_ButtonHovered, ImColor( 0x1c, 0x2a, 0x59 ) );
-			ImGui::PushStyleColor( ImGuiCol_ButtonActive, ImColor( 0x1c, 0x2a, 0x59 ) );
+			ImGui::PushStyleColor( ImGuiCol_Button, IM_COL32( 0x1c, 0x2a, 0x59, 0xff ) );
+			ImGui::PushStyleColor( ImGuiCol_ButtonHovered, IM_COL32( 0x1c, 0x2a, 0x59, 0xff ) );
+			ImGui::PushStyleColor( ImGuiCol_ButtonActive, IM_COL32( 0x1c, 0x2a, 0x59, 0xff ) );
 			ImGui::Button( "Checking for updates...", ImVec2( -1, 50 ) );
 			ImGui::PopStyleColor( 3 );
 		}
@@ -1014,12 +1020,16 @@ int main( int argc, char ** argv ) {
 		ImGui::End();
 
 		ImGui::Render();
+		ImGui_ImplOpenGL2_RenderDrawData( ImGui::GetDrawData() );
+
 		glfwSwapBuffers( window );
 
 		last_frame_time = now;
 	}
 
-	ImGui_ImplGlfwGL3_Shutdown();
+	ImGui_ImplOpenGL2_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 
 	gl_term();
 
