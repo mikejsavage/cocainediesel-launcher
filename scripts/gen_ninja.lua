@@ -20,11 +20,11 @@ local configs = {
 	},
 
 	[ "windows-debug" ] = {
-		cxxflags = "/Od /MTd /Z7 /Zo",
-		ldflags = "/Od /MTd /Z7 /Zo",
+		cxxflags = "/Od /MDd /Z7 /Zo",
+		ldflags = "/Od /MDd /Z7 /Zo",
 	},
 	[ "windows-release" ] = {
-		cxxflags = "/O2 /MT /DRELEASE_BUILD",
+		cxxflags = "/O2 /MD /DRELEASE_BUILD",
 		bin_prefix = "release/",
 	},
 
@@ -37,7 +37,7 @@ local configs = {
 		cxx = "g++",
 
 		cxxflags = "-I . -c -x c++ -std=c++11 -msse2 -ffast-math -fno-exceptions -fno-rtti -fno-strict-aliasing -fno-strict-overflow -fdiagnostics-color",
-		ldflags = "-lm -lpthread -ldl",
+		ldflags = "-lm -lpthread -ldl -no-pie",
 		warnings = "-Wall -Wextra -Wno-unused-parameter -Wno-unused-function -Wshadow -Wcast-align -Wstrict-overflow -Wvla -Wformat-security", -- -Wconversion
 	},
 
