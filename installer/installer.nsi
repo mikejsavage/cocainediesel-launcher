@@ -47,6 +47,10 @@ Section "Install" SectionInstall
 	WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel" "EstimatedSize" $1
 SectionEnd
 
+Function .onInstSuccess
+	Exec "cocainediesel.exe"
+FunctionEnd
+
 Section "Uninstall"
 	# Files
 	Delete "$INSTDIR\client.exe"
