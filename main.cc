@@ -812,7 +812,7 @@ static void step_updater( double now ) {
 	}
 }
 
-int main( int argc, char ** argv ) {
+static void launcher_main() {
 	std::string game_folder = get_executable_directory();
 	if( !change_directory( game_folder.c_str() ) )
 		FATAL( "change_directory" );
@@ -824,10 +824,6 @@ int main( int argc, char ** argv ) {
 
 	if( curl_multi_setopt( curl_multi, CURLMOPT_MAX_TOTAL_CONNECTIONS, 8l ) != CURLM_OK )
 		FATAL( "curl_multi_setopt" );
-
-	if( argc == 2 && strcmp( argv[ 1 ], "--start-update" ) == 0 ) {
-		autostart_update = true;
-	}
 
 	GLFWwindow * window = gl_init();
 
@@ -1037,6 +1033,30 @@ int main( int argc, char ** argv ) {
 
 	curl_multi_cleanup( curl_multi );
 	curl_global_cleanup();
+}
+
+#if PLATFORM_WINDOWS
+
+int WinMain( HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int nShowCmd ) {
+	if( strcmp( lpszCmdLine, "--start-update" ) == 0 ) {
+		autostart_update = true;
+	}
+
+	launcher_main();
 
 	return 0;
 }
+
+#else
+
+int main( int argc, char ** argv ) {
+	if( argc == 2 && strcmp( argv[ 1 ], "--start-update" ) == 0 ) {
+		autostart_update = true;
+	}
+
+	launcher_main();
+
+	return 0;
+}
+
+#endif
