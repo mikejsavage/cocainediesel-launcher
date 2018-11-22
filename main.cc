@@ -558,7 +558,7 @@ static void step_updater( double now ) {
 		long http_status;
 		curl_easy_getinfo( msg->easy_handle, CURLINFO_RESPONSE_CODE, &http_status ); 
 
-		if( msg->data.result == CURLE_OK && http_status == 200 ) {
+		if( msg->data.result == CURLE_OK && http_status / 100 == 2 ) {
 			dl->state = DownloadState_Done;
 		}
 		else {
