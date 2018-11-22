@@ -417,8 +417,8 @@ static bool parse_signed_manifest( std::unordered_map< std::string, ManifestEntr
 	ASSERT( ok_hex );
 
 	int signature_ok = crypto_check( signature, PUBLIC_KEY, ( const u8 * ) matches[ 1 ].ptr(), matches[ 1 ].n );
-	// if( signature_ok != 0 )
-	// 	return false;
+	if( signature_ok != 0 )
+		return false;
 
 	return parse_manifest( manifest, matches[ 1 ].ptr() );
 }
