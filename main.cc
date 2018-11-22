@@ -273,7 +273,6 @@ enum UpdaterState {
 	// UpdaterState_ReservingSpace,
 
 	UpdaterState_DownloadingUpdate,
-	// UpdaterState_DownloadingUpdate_Retry,
 
 	UpdaterState_InstallingUpdate,
 	UpdaterState_InstallingUpdateFailed,
@@ -285,11 +284,15 @@ enum DownloadState {
 	DownloadState_Downloading,
 	DownloadState_Done,
 	DownloadState_Failed,
+	DownloadState_Retry,
 };
 
 struct Download {
+	Download( const char * u ) : url( u ) { }
 	DownloadState state = DownloadState_Downloading;
+	std::string url;
 	std::string body;
+	double retry_at;
 };
 
 struct Updater {
@@ -312,7 +315,8 @@ struct Updater {
 static Updater updater;
 static bool autostart_update = false;
 
-#define HOST "cocainediesel.mikejsavage.co.uk"
+// #define HOST "cocainediesel.mikejsavage.co.uk"
+#define HOST "127.0.0.1:8000"
 
 #if PLATFORM_WINDOWS
 static void set_registry_key( HKEY hkey, const char * path, const char * value, const char * data ) {
@@ -367,14 +371,22 @@ static size_t data_received( char * data, size_t size, size_t nmemb, void * user
 	return len;
 }
 
-static void download( const char * url ) {
-	LOG( "Downloading {}\n", url );
+static void download( const char * url, Download * reuse = NULL ) {
+	LOG( "Downloading {}", url );
 
 	CURL * curl = curl_easy_init();
 	if( curl == NULL )
 		FATAL( "curl_easy_init" );
 
-	updater.downloads.push_back( Download() );
+	if( reuse == NULL ) {
+		updater.downloads.push_back( Download( url ) );
+		/*
+		 * we either only download one thing at a time (version/manifest)
+		 * or have already reserved enough space in the downloads vector, so
+		 * taking a pointer here is ok
+		 */
+		reuse = &updater.downloads.back();
+	}
 
 	try_set_opt( curl, CURLOPT_URL, url );
 	try_set_opt( curl, CURLOPT_WRITEFUNCTION, data_received );
@@ -384,13 +396,11 @@ static void download( const char * url ) {
 	try_set_opt( curl, CURLOPT_LOW_SPEED_TIME, 10l );
 	try_set_opt( curl, CURLOPT_LOW_SPEED_LIMIT, 10l );
 
-	/*
-	 * we either only download one thing at a time (version/manifest)
-	 * or have already reserved enough space in the downloads vector, so
-	 * taking a pointer here is ok
-	 */
-	try_set_opt( curl, CURLOPT_WRITEDATA, &updater.downloads.back() );
-	try_set_opt( curl, CURLOPT_PRIVATE, &updater.downloads.back() );
+	str< 128 > range( "{}-", reuse->body.size() );
+	try_set_opt( curl, CURLOPT_RANGE, range.c_str() );
+
+	try_set_opt( curl, CURLOPT_WRITEDATA, reuse );
+	try_set_opt( curl, CURLOPT_PRIVATE, reuse );
 
 	curl_multi_add_handle( curl_multi, curl );
 }
@@ -407,8 +417,8 @@ static bool parse_signed_manifest( std::unordered_map< std::string, ManifestEntr
 	ASSERT( ok_hex );
 
 	int signature_ok = crypto_check( signature, PUBLIC_KEY, ( const u8 * ) matches[ 1 ].ptr(), matches[ 1 ].n );
-	if( signature_ok != 0 )
-		return false;
+	// if( signature_ok != 0 )
+	// 	return false;
 
 	return parse_manifest( manifest, matches[ 1 ].ptr() );
 }
@@ -454,7 +464,6 @@ static bool rename_replace( const char * old_path, const char * new_path ) {
 }
 
 static bool change_directory( const char * path ) {
-	ggprint( "{}\n", path );
 	return chdir( path ) == 0;
 }
 
@@ -507,6 +516,23 @@ static std::string get_executable_directory() {
 	return result;
 }
 
+static double last_failures[ 4 ];
+static size_t last_failures_count = 0;
+
+static int retry_delay( double now ) {
+	last_failures[ last_failures_count % ARRAY_COUNT( last_failures ) ] = now;
+	last_failures_count++;
+
+	size_t recent_failures = 0;
+
+	for( size_t i = 0; i < min( last_failures_count, ARRAY_COUNT( last_failures ) ); i++ ) {
+		if( last_failures[ i ] >= now - 5 )
+			recent_failures++;
+	}
+
+	return recent_failures == ARRAY_COUNT( last_failures ) ? 10 : 0;
+}
+
 static void step_updater( double now ) {
 	bool retry = now >= updater.retry_at;
 
@@ -530,7 +556,10 @@ static void step_updater( double now ) {
 		Download * dl;
 		curl_easy_getinfo( msg->easy_handle, CURLINFO_PRIVATE, &dl );
 
-		if( msg->data.result == CURLE_OK ) {
+		long http_status;
+		curl_easy_getinfo( msg->easy_handle, CURLINFO_RESPONSE_CODE, &http_status ); 
+
+		if( msg->data.result == CURLE_OK && http_status == 200 ) {
 			dl->state = DownloadState_Done;
 		}
 		else {
@@ -648,7 +677,6 @@ static void step_updater( double now ) {
 				str< 256 > url( HOST "/{}.txt", updater.remote_version );
 				download( url.c_str() );
 				updater.state = UpdaterState_DownloadingManifest;
-				updater.bytes_downloaded = 0;
 			}
 			break;
 
@@ -656,6 +684,7 @@ static void step_updater( double now ) {
 			break;
 
 		case UpdaterState_StartUpdate:
+			updater.bytes_downloaded = 0;
 			updater.downloads.reserve( updater.files_to_update.size() );
 			for( size_t i = 0; i < updater.files_to_update.size(); i++ ) {
 				str< 256 > url( HOST "/{}", updater.remote_manifest[ updater.files_to_update[ i ] ].checksum );
@@ -667,18 +696,24 @@ static void step_updater( double now ) {
 
 		case UpdaterState_DownloadingUpdate: {
 			bool all_done = true;
-			bool any_failed = false;
-			for( const Download & dl : updater.downloads ) {
-				if( dl.state == DownloadState_Downloading ) {
+			for( Download & dl : updater.downloads ) {
+				if( dl.state != DownloadState_Done )
 					all_done = false;
-				}
+
 				if( dl.state == DownloadState_Failed ) {
-					any_failed = true;
+					int delay = retry_delay( now );
+					LOG( "Downloading {} failed, retrying in {} seconds", dl.url, delay );
+					dl.state = DownloadState_Retry;
+					dl.retry_at = now + delay;
+				}
+
+				if( dl.state == DownloadState_Retry && now >= dl.retry_at ) {
+					dl.state = DownloadState_Downloading;
+					download( dl.url.c_str(), &dl );
 				}
 			}
 
-			// TODO: retry
-			if( all_done && !any_failed ) {
+			if( all_done ) {
 				updater.state = UpdaterState_InstallingUpdate;
 			}
 		} break;
