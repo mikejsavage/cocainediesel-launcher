@@ -315,8 +315,7 @@ struct Updater {
 static Updater updater;
 static bool autostart_update = false;
 
-// #define HOST "cocainediesel.mikejsavage.co.uk"
-#define HOST "127.0.0.1:8000"
+#define HOST "cocainediesel.mikejsavage.co.uk"
 
 #if PLATFORM_WINDOWS
 static void set_registry_key( HKEY hkey, const char * path, const char * value, const char * data ) {
