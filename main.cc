@@ -879,6 +879,7 @@ static void launcher_main() {
 		ImGuiIO & io = ImGui::GetIO();
 		ImFontConfig config;
 		config.FontDataOwnedByAtlas = false;
+		config.OversampleV = 4;
 		io.IniFilename = NULL;
 		io.Fonts->AddFontFromMemoryTTF( data, size, 16.0f, &config );
 		small = io.Fonts->AddFontFromMemoryTTF( data, size, 12.0f, &config );
