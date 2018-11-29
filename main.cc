@@ -1070,7 +1070,7 @@ static void launcher_main() {
 
 		ImGui::PopFont();
 
-		ImGui::Text( "v%hhu.%hhu.%hhu.%hhu", updater.local_version.a, updater.local_version.b, updater.local_version.c, updater.local_version.d );
+		ImGui::Text( "Currently installed: v%hhu.%hhu.%hhu.%hhu", updater.local_version.a, updater.local_version.b, updater.local_version.c, updater.local_version.d );
 
 		ImGui::BeginChildFrame( 1337, ImVec2(), 0
 			| ImGuiWindowFlags_AlwaysVerticalScrollbar
