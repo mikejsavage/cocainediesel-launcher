@@ -1053,6 +1053,7 @@ static void launcher_main() {
 		for( const std::string & line : log_lines ) {
 			ImGui::TextWrapped( "%s", line.c_str() );
 		}
+		ImGui::SetScrollHereY();
 		ImGui::PopFont();
 		ImGui::EndChildFrame();
 
