@@ -24,6 +24,7 @@
 
 #endif
 
+#define CURL_STATICLIB
 #include "libs/curl/curl.h"
 
 #undef ssize_t
