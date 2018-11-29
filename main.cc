@@ -16,6 +16,7 @@
 #include "patterns.h"
 #include "platform_exec.h"
 #include "liberation.h"
+#include "discord.h"
 
 #define GLFW_INCLUDE_NONE
 #include "libs/glfw/include/GLFW/glfw3.h"
@@ -521,6 +522,27 @@ static std::string get_executable_directory() {
 	return result;
 }
 
+static const char * step_discord() {
+	DiscordState state = discord_update();
+
+	if( state == DiscordState_Unauthenticated ) {
+		bool login = ImGui::Button( "Link with with Discord" );
+		if( login ) {
+			discord_login();
+		}
+	}
+	else if( state == DiscordState_Authenticating ) {
+		ImGui::Text( "Linking... check your browser" );
+	}
+	else if( state == DiscordState_Authenticated ) {
+		DiscordUser user = discord_user();
+		ImGui::Text( "Hi %s#%s. Run the game and then you won't need to do this again", user.username, user.discriminator );
+		return user.id;
+	}
+
+	return NULL;
+}
+
 static double last_failures[ 4 ];
 static size_t last_failures_count = 0;
 
@@ -541,9 +563,9 @@ static int retry_delay( double now ) {
 static void step_updater( double now ) {
 	bool retry = now >= updater.retry_at;
 
-	int remaining_transfers;
 	while( true ) {
-		CURLMcode r = curl_multi_perform( curl_multi, &remaining_transfers );
+		int dont_care;
+		CURLMcode r = curl_multi_perform( curl_multi, &dont_care );
 		if( r == CURLM_OK )
 			break;
 		if( r != CURLM_CALL_MULTI_PERFORM )
@@ -865,6 +887,8 @@ static void launcher_main() {
 	if( curl_multi_setopt( curl_multi, CURLMOPT_MAX_TOTAL_CONNECTIONS, 8l ) != CURLM_OK )
 		FATAL( "curl_multi_setopt" );
 
+	discord_init();
+
 	GLFWwindow * window = gl_init();
 
 	IMGUI_CHECKVERSION();
@@ -904,7 +928,7 @@ static void launcher_main() {
 
 	double last_frame_time = glfwGetTime();
 	while( !glfwWindowShouldClose( window ) ) {
-		if( updater.state == UpdaterState_NeedsUpdate || updater.state == UpdaterState_ReadyToPlay )
+		if( ( updater.state == UpdaterState_NeedsUpdate || updater.state == UpdaterState_ReadyToPlay ) && discord_state() != DiscordState_Authenticating )
 			glfwWaitEvents();
 		else
 			glfwPollEvents();
@@ -951,7 +975,7 @@ static void launcher_main() {
 			| ImGuiWindowFlags_NoScrollWithMouse
 		);
 
-		ImGui::Text( "v%hhu.%hhu.%hhu.%hhu", updater.local_version.a, updater.local_version.b, updater.local_version.c, updater.local_version.d );
+		const char * discord_user_id = step_discord();
 
 		ImGui::PushFont( large );
 		if( updater.state == UpdaterState_ReadyToPlay ) {
@@ -963,7 +987,7 @@ static void launcher_main() {
 			ImGui::PopStyleColor( 3 );
 
 			if( launch || enter_key_pressed ) {
-				exec_and_quit( GAME_BINARY );
+				run_game( GAME_BINARY, discord_user_id );
 			}
 		}
 		else if( updater.state == UpdaterState_NeedsUpdate ) {
@@ -1046,6 +1070,8 @@ static void launcher_main() {
 
 		ImGui::PopFont();
 
+		ImGui::Text( "v%hhu.%hhu.%hhu.%hhu", updater.local_version.a, updater.local_version.b, updater.local_version.c, updater.local_version.d );
+
 		ImGui::BeginChildFrame( 1337, ImVec2(), 0
 			| ImGuiWindowFlags_AlwaysVerticalScrollbar
 		);
@@ -1072,6 +1098,8 @@ static void launcher_main() {
 	ImGui::DestroyContext();
 
 	gl_term();
+
+	discord_shutdown();
 
 	curl_multi_cleanup( curl_multi );
 	curl_global_cleanup();

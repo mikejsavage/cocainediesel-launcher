@@ -3,16 +3,17 @@ require( "scripts.gen_ninja" )
 require( "libs/imgui" )
 require( "libs/glfw" )
 require( "libs/monocypher" )
+require( "libs/picohttpparser" )
 require( "libs/stb" )
 require( "libs/whereami" )
 
 bin( "cocainediesel", {
 	srcs = {
 		"main.cc", "ggformat.cc", "strlcpy.cc", "strtonum.cc", "patterns.cc",
-		"gl.cc", "glad.cc", "liberation.cc", "png.cc",
+		"gl.cc", "glad.cc", "liberation.cc", "png.cc", "discord.cc",
 	},
 
-	libs = { "glfw", "imgui", "monocypher", "stb_image", "stb_truetype", "whereami" },
+	libs = { "glfw", "imgui", "monocypher", "picohttpparser", "stb_image", "stb_truetype", "whereami" },
 	prebuilt_libs = { "curl", OS == "linux" and "mbedtls" or nil },
 
 	rc = "cocainediesel_manifest",
