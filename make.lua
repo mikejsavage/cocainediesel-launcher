@@ -17,7 +17,7 @@ bin( "cocainediesel", {
 
 	rc = "cocainediesel_manifest",
 
-	msvc_extra_ldflags = "opengl32.lib gdi32.lib Ws2_32.lib",
+	msvc_extra_ldflags = "opengl32.lib gdi32.lib Ws2_32.lib crypt32.lib",
 	gcc_extra_ldflags = "-lX11",
 } )
 
