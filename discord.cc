@@ -1,7 +1,3 @@
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <poll.h>
-
 #include "intrinsics.h"
 #include "array.h"
 #include "str.h"
@@ -11,11 +7,30 @@
 #include "platform_exec.h"
 #include "discord.h"
 
+#if PLATFORM_WINDOWS
+
+#include <io.h>
+#include <winsock2.h>
+
+#else
+
+#include <sys/socket.h>
+#include <sys/select.h>
+#include <netinet/in.h>
+
+#define SOCKET int
+#define INVALID_SOCKET ( -1 )
+#define closesocket close
+
+#endif
+
 #include "libs/curl/curl.h"
+
+#undef ssize_t
 #include "libs/picohttpparser/picohttpparser.h"
 
-static int listen_fd;
-static int req_fd;
+static SOCKET listen_fd;
+static SOCKET req_fd;
 
 static DiscordState state;
 
@@ -36,34 +51,34 @@ static str< 128 > avatar;
 
 void discord_init() {
 	state = DiscordState_Error;
-	req_fd = -1;
+	req_fd = INVALID_SOCKET;
 
 	curl_multi = curl_multi_init();
 	if( curl_multi == NULL )
 		return;
 
 	listen_fd = socket( AF_INET, SOCK_STREAM, 0 );
-	if( listen_fd == -1 )
+	if( listen_fd == INVALID_SOCKET )
 		return;
 
 	int one = 1;
-	setsockopt( listen_fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof( one ) );
+	setsockopt( listen_fd, SOL_SOCKET, SO_REUSEADDR, ( char * ) &one, sizeof( one ) );
 
 	struct sockaddr_in server_addr = { };
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_addr.s_addr = htonl( INADDR_ANY );
 	server_addr.sin_port = htons( 13337 );
-	int ok_bind = bind( listen_fd, ( struct sockaddr * )&server_addr, sizeof( server_addr ) );
-	if( ok_bind == -1 ) {
-		close( listen_fd );
-		listen_fd = -1;
+	int ok_bind = bind( listen_fd, ( struct sockaddr * ) &server_addr, sizeof( server_addr ) );
+	if( ok_bind == INVALID_SOCKET ) {
+		closesocket( listen_fd );
+		listen_fd = INVALID_SOCKET;
 		return;
 	}
 
 	int ok_listen = listen( listen_fd, 1 );
 	if( ok_listen == -1 ) {
-		close( listen_fd );
-		listen_fd = -1;
+		closesocket( listen_fd );
+		listen_fd = INVALID_SOCKET;
 		return;
 	}
 
@@ -71,8 +86,8 @@ void discord_init() {
 }
 
 void discord_shutdown() {
-	if( listen_fd != -1 )
-		close( listen_fd );
+	if( listen_fd != INVALID_SOCKET )
+		closesocket( listen_fd );
 
 	curl_multi_cleanup( curl_multi );
 }
@@ -134,32 +149,32 @@ static CURL * make_curl( const char * url ) {
 	return curl;
 }
 
+bool poll_read( SOCKET sock ) {
+	fd_set fds;
+	FD_ZERO( &fds );
+	FD_SET( sock, &fds );
+
+	struct timeval tv = { };
+	int ok = select( int( sock + 1 ), &fds, NULL, NULL, &tv );
+	return ok > 0;
+}
+
 DiscordState discord_update() {
 	if( state == DiscordState_Authenticating ) {
 		if( req_fd == -1 ) {
-			pollfd p;
-			p.events = POLLIN;
-			p.fd = listen_fd;
-
-			int r = poll( &p, 1, 0 );
-			if( r > 0 ) {
+			if( poll_read( listen_fd ) ) {
 				req_fd = accept( listen_fd, NULL, NULL );
 				req_size = 0;
 			}
 		}
 
-		if( req_fd != -1 ) {
-			pollfd p;
-			p.events = POLLIN;
-			p.fd = req_fd;
-
-			int r = poll( &p, 1, 0 );
-			if( r > 0 ) {
-				ssize_t b = read( req_fd, req_buffer + req_size, sizeof( req_buffer ) - req_size );
+		if( req_fd != INVALID_SOCKET ) {
+			if( poll_read( req_fd ) ) {
+				ssize_t b = recv( req_fd, req_buffer + req_size, sizeof( req_buffer ) - req_size, 0 );
 
 				if( b == 0 ) {
-					close( req_fd );
-					req_fd = -1;
+					closesocket( req_fd );
+					req_fd = INVALID_SOCKET;
 				}
 				else {
 					const char * method;
@@ -179,9 +194,9 @@ DiscordState discord_update() {
 					if( ok >= 0 ) {
 						const char * body = "<html><body><h3>Cocaine Diesel auth page - you can close this tab</h3></body></html>";
 						str< 512 > response( "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}", strlen( body ), body );
-						write( req_fd, response.c_str(), response.len() );
-						close( req_fd );
-						req_fd = -1;
+						send( req_fd, response.c_str(), response.len(), 0 );
+						closesocket( req_fd );
+						req_fd = INVALID_SOCKET;
 
 						res_size = 0;
 
