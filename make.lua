@@ -13,7 +13,7 @@ bin( "cocainediesel", {
 	},
 
 	libs = { "glfw", "imgui", "monocypher", "stb_image", "stb_truetype", "whereami" },
-	prebuilt_libs = { "curl" },
+	prebuilt_libs = { "curl", OS == "linux" and "mbedtls" },
 
 	rc = "cocainediesel_manifest",
 

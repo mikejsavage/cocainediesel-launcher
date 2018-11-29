@@ -21,9 +21,10 @@ Section "Install" SectionInstall
 	SetOutPath $INSTDIR
 	File ..\release\cocainediesel.exe
 	File ..\release\elevate_for_update.exe
-	File ..\licenses.txt
-	File ..\gnu.txt
-	File ..\LGPL2.txt
+	File licenses.txt
+	File apache-2.0.txt
+	File gnu.txt
+	File LGPL2.txt
 
 	# Start menu shortcut
 	CreateDirectory "$SMPROGRAMS\Cocaine Diesel"
@@ -61,6 +62,7 @@ Section "Uninstall"
 	Delete "$INSTDIR\elevate_for_update.exe"
 	Delete "$INSTDIR\uninstall.exe"
 	Delete "$INSTDIR\licenses.txt"
+	Delete "$INSTDIR\apache-2.0.txt"
 	Delete "$INSTDIR\gnu.txt"
 	Delete "$INSTDIR\LGPL2.txt"
 	Delete "$INSTDIR\version.txt"

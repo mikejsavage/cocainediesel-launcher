@@ -14,7 +14,6 @@
 #include "strlcpy.h"
 #include "strtonum.h"
 #include "patterns.h"
-#include "platform.h"
 #include "platform_exec.h"
 #include "liberation.h"
 
@@ -311,7 +310,7 @@ struct Updater {
 static Updater updater;
 static bool autostart_update = false;
 
-#define HOST "cocainediesel.mikejsavage.co.uk"
+#define HOST "https://cocainediesel.mikejsavage.co.uk"
 
 #if PLATFORM_WINDOWS
 static void set_registry_key( HKEY hkey, const char * path, const char * value, const char * data ) {
@@ -396,6 +395,17 @@ static void download( const char * url, Download * reuse = NULL ) {
 
 	try_set_opt( curl, CURLOPT_WRITEDATA, reuse );
 	try_set_opt( curl, CURLOPT_PRIVATE, reuse );
+
+#if PLATFORM_LINUX
+	/*
+	 * some ISP was doing broken caching and serving the wrong files over
+	 * HTTP so we use HTTPS. we have our own integrity checks and setting
+	 * up certs on Linux is really annoying so just don't bother
+	 *
+	 * we also use HTTPS for discord oauth but who cares about that
+	 */
+	try_set_opt( curl, CURLOPT_SSL_VERIFYPEER, 0l );
+#endif
 
 	curl_multi_add_handle( curl_multi, curl );
 }
@@ -847,7 +857,7 @@ static void launcher_main() {
 	if( !change_directory( game_folder.c_str() ) )
 		FATAL( "change_directory" );
 
-	curl_global_init( CURL_GLOBAL_ALL );
+	curl_global_init( CURL_GLOBAL_DEFAULT );
 	curl_multi = curl_multi_init();
 	if( curl_multi == NULL )
 		FATAL( "curl_multi_init" );
