@@ -33,8 +33,9 @@ Section "Install" SectionInstall
 	# Uninstaller
 	WriteUninstaller "$INSTDIR\uninstall.exe"
 
-	# Registry keys
 	SetRegView 64
+
+	# Uninstall registry keys
 	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel" "DisplayName" "Cocaine Diesel"
 	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel" "UninstallString" "$INSTDIR\uninstall.exe"
 	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel" "DisplayIcon" "$INSTDIR\uninstall.exe"
@@ -42,10 +43,21 @@ Section "Install" SectionInstall
 	WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel" "DisplayVersion" "0.0.0.0"
 	WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel" "NoModify" 1
 	WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel" "NoRepair" 1
-	
+
 	SectionGetSize ${SectionInstall} $0
 	IntFmt $1 "0x%08X" $0
 	WriteRegDWORD HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel" "EstimatedSize" $1
+
+	# diesel:// registry keys
+	WriteRegStr HKCR "diesel" "" "URL:diesel protocl"
+	WriteRegStr HKCR "diesel" "URL Protocol" ""
+	WriteRegStr HKCR "diesel\DefaultIcon" "" "$INSTDIR\cocainediesel.exe"
+	WriteRegStr HKCR "diesel\Shell\Open\Command" "" "$\"$INSTDIR\client.exe$\" +set fs_basepath $\"$INSTDIR$\" +connect $\"%1$\""
+
+	# Demo registry keys
+	WriteRegStr HKCR ".cddemo" "" "Cocaine Diesel Demo"
+	WriteRegStr HKCR "Cocaine Diesel Demo\DefaultIcon" "" "$INSTDIR\cocainediesel.exe"
+	WriteRegStr HKCR "Cocaine Diesel Demo\Shell\Open\Command" "" "$\"$INSTDIR\client.exe$\" +set fs_basepath $\"$INSTDIR$\" +demo $\"%1$\""
 SectionEnd
 
 Function .onInstSuccess
@@ -79,4 +91,7 @@ Section "Uninstall"
 	# Registry keys
 	SetRegView 64
 	DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\CocaineDiesel"
+	DeleteRegKey HKCR "diesel"
+	DeleteRegKey HKCR ".cddemo"
+	DeleteRegKey HKCR "Cocaine Diesel Demo"
 SectionEnd
