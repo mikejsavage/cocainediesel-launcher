@@ -752,14 +752,9 @@ static UpdaterState updater_update( bool wait ) {
 				// TODO: handle error
 				fwrite( updater.downloads[ i ].body.c_str(), 1, updater.downloads[ i ].body.size(), f );
 
-#if PLATFORM_UNIX
 				if( updater.remote_manifest[ file_name ].platform_specific ) {
-					// mark executable
-					// TODO: handle error
-					int fd = fileno( f );
-					fchmod( fd, 0755 );
+					mark_executable( f );
 				}
-#endif
 
 				// TODO: handle error
 				fclose( f );

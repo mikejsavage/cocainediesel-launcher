@@ -21,3 +21,7 @@ inline bool remove_file( const char * path ) {
 inline bool remove_directory( const char * path ) {
 	return RemoveDirectoryA( path ) != 0;
 }
+
+inline bool mark_executable( FILE * f ) {
+	return true;
+}

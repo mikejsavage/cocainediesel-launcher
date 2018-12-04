@@ -24,3 +24,9 @@ inline bool remove_file( const char * path ) {
 inline bool remove_directory( const char * path ) {
 	return rmdir( path ) == 0;
 }
+
+inline bool mark_executable( FILE * f ) {
+	int fd = fileno( f );
+	ASSERT( fd != -1 );
+	return fchmod( fd, 0755 ) == 0;
+}
