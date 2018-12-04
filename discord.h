@@ -15,7 +15,7 @@ struct DiscordUser {
 };
 
 void discord_init();
-void discord_shutdown();
+void discord_term();
 
 DiscordState discord_state();
 DiscordState discord_update();

@@ -12,12 +12,13 @@ build.ninja
 *.trace
 
 cocainediesel
+headlessupdater
 b2sum
 genkeys
 sign
 
 secret_key.h
 
-0.*
+/*.*.*.*
 
 WC

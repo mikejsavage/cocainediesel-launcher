@@ -7,7 +7,7 @@ mkdir release
 file_platform() {
 	if [ "${1: -4}" = ".exe" ] || [ "${1: -4}" = ".dll" ]; then
 		echo " windows64"
-	elif [ "$1" = "client" ] || [ "$1" = "server" ] || [ "$1" = "cocainediesel" ] || [ "${1: -3}" = ".so" ]; then
+	elif [ "$1" = "client" ] || [ "$1" = "server" ] || [ "$1" = "cocainediesel" ] || [ "$1" = "headlessupdater" ] || [ "${1: -3}" = ".so" ]; then
 		echo " linux64"
 	fi
 }

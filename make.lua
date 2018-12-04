@@ -9,7 +9,7 @@ require( "libs/whereami" )
 
 bin( "cocainediesel", {
 	srcs = {
-		"main.cc", "ggformat.cc", "strlcpy.cc", "strtonum.cc", "patterns.cc",
+		"main.cc", "updater.cc", "ggformat.cc", "strlcpy.cc", "strtonum.cc", "patterns.cc",
 		"gl.cc", "glad.cc", "liberation.cc", "png.cc", "discord.cc",
 	},
 
@@ -20,6 +20,13 @@ bin( "cocainediesel", {
 
 	msvc_extra_ldflags = "opengl32.lib gdi32.lib Ws2_32.lib crypt32.lib",
 	gcc_extra_ldflags = "-lX11",
+} )
+
+bin( "headlessupdater", {
+	srcs = { "headless.cc", "updater.cc", "ggformat.cc", "strlcpy.cc", "strtonum.cc", "patterns.cc" },
+
+	libs = { "monocypher", "whereami" },
+	prebuilt_libs = { "curl", OS == "linux" and "mbedtls" or nil },
 } )
 
 if OS == "windows" then

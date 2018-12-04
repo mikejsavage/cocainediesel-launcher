@@ -86,7 +86,7 @@ void discord_init() {
 	state = DiscordState_Unauthenticated;
 }
 
-void discord_shutdown() {
+void discord_term() {
 	if( listen_fd != INVALID_SOCKET )
 		closesocket( listen_fd );
 
