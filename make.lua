@@ -10,7 +10,7 @@ require( "libs/whereami" )
 bin( "cocainediesel", {
 	srcs = {
 		"main.cc", "updater.cc", "ggformat.cc", "strlcpy.cc", "strtonum.cc", "patterns.cc",
-		"gl.cc", "glad.cc", "liberation.cc", "png.cc", "discord.cc",
+		"platform_taskbar.cc", "gl.cc", "glad.cc", "liberation.cc", "png.cc", "discord.cc",
 	},
 
 	libs = { "glfw", "imgui", "monocypher", "picohttpparser", "stb_image", "stb_truetype", "whereami" },
@@ -18,7 +18,7 @@ bin( "cocainediesel", {
 
 	rc = "cocainediesel_manifest",
 
-	msvc_extra_ldflags = "opengl32.lib gdi32.lib Ws2_32.lib crypt32.lib",
+	msvc_extra_ldflags = "opengl32.lib gdi32.lib ole32.lib Ws2_32.lib crypt32.lib",
 	gcc_extra_ldflags = "-lX11",
 } )
 

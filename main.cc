@@ -10,6 +10,7 @@
 #include "png.h"
 #include "str.h"
 #include "platform_exec.h"
+#include "platform_taskbar.h"
 #include "liberation.h"
 
 #define CURL_STATICLIB
@@ -63,6 +64,7 @@ static void launcher_main( bool autostart ) {
 	updater_init( autostart, log_cb );
 	discord_init();
 	GLFWwindow * window = gl_init();
+	taskbar_init();
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -193,6 +195,8 @@ static void launcher_main( bool autostart ) {
 			ImGui::PushStyleColor( ImGuiCol_PlotHistogram, IM_COL32( 0x29, 0x8a, 0x67, 0xff ) );
 			ImGui::ProgressBar( progress, ImVec2( -1, 50 ), progress_text.c_str() );
 			ImGui::PopStyleColor();
+
+			taskbar_progress( window, updater_bytes_downloaded(), updater_update_size() );
 		}
 		else if( updater_state == UpdaterState_InstallingUpdate ) {
 			ImGui::PushStyleColor( ImGuiCol_Button, IM_COL32( 0x1c, 0x2a, 0x59, 0xff ) );
@@ -200,6 +204,8 @@ static void launcher_main( bool autostart ) {
 			ImGui::PushStyleColor( ImGuiCol_ButtonActive, IM_COL32( 0x1c, 0x2a, 0x59, 0xff ) );
 			ImGui::Button( "Installing update...", ImVec2( -1, 50 ) );
 			ImGui::PopStyleColor( 3 );
+
+			taskbar_clear( window );
 		}
 		else {
 			ImGui::PushStyleColor( ImGuiCol_Button, IM_COL32( 0x1c, 0x2a, 0x59, 0xff ) );
@@ -237,6 +243,7 @@ static void launcher_main( bool autostart ) {
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 
+	taskbar_term();
 	gl_term();
 	discord_term();
 	updater_term();
