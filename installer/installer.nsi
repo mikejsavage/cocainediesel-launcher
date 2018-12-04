@@ -20,6 +20,7 @@ Section "Install" SectionInstall
 	# Install stuff
 	SetOutPath $INSTDIR
 	File ..\release\cocainediesel.exe
+	File ..\release\headlessupdater.exe
 	File ..\release\elevate_for_update.exe
 	File licenses.txt
 	File apache-2.0.txt
@@ -70,7 +71,9 @@ Section "Uninstall"
 	Delete "$INSTDIR\SDL2.dll"
 	Delete "$INSTDIR\server.exe"
 	Delete "$INSTDIR\cocainediesel.exe"
+	Delete "$INSTDIR\headlessupdater.exe"
 	Delete "$INSTDIR\cocainediesel.exe.old"
+	Delete "$INSTDIR\headlessupdater.exe.old"
 	Delete "$INSTDIR\elevate_for_update.exe"
 	Delete "$INSTDIR\uninstall.exe"
 	Delete "$INSTDIR\licenses.txt"
