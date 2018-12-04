@@ -37,7 +37,7 @@ local configs = {
 		cxx = "g++",
 
 		cxxflags = "-I . -c -x c++ -std=c++11 -static-libstdc++ -msse2 -ffast-math -fno-exceptions -fno-rtti -fno-strict-aliasing -fno-strict-overflow -fdiagnostics-color",
-		ldflags = "-lm -lpthread -ldl -no-pie",
+		ldflags = "-lm -lpthread -ldl -no-pie -static-libstdc++",
 		warnings = "-Wall -Wextra -Wno-unused-parameter -Wno-unused-function -Wshadow -Wcast-align -Wstrict-overflow -Wvla -Wformat-security", -- -Wconversion
 	},
 
