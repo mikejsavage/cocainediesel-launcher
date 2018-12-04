@@ -27,6 +27,8 @@ bin( "headlessupdater", {
 
 	libs = { "monocypher", "whereami" },
 	prebuilt_libs = { "curl", OS == "linux" and "mbedtls" or nil },
+
+	msvc_extra_ldflags = "Ws2_32.lib crypt32.lib",
 } )
 
 if OS == "windows" then

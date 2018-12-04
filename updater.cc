@@ -276,7 +276,7 @@ static void log_gle( const char * fmt, const Rest & ... rest ) {
 	char buf[ 1024 ];
 	FormatMessageA( FORMAT_MESSAGE_FROM_SYSTEM, NULL, error,
 		MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ), buf, sizeof( buf ), NULL );
-	s += strerror( buf );
+	s += buf;
 
 	log_callback( s.c_str() );
 }
@@ -703,7 +703,7 @@ static UpdaterState updater_update( bool wait ) {
 				}
 			}
 
-			update_smooth( &updater.download_speed, updater.bytes_downloaded - updater.last_bytes_downloaded, now );
+			update_smooth( &updater.download_speed, double( updater.bytes_downloaded - updater.last_bytes_downloaded ), now );
 			updater.last_bytes_downloaded = updater.bytes_downloaded;
 
 			if( all_done ) {
