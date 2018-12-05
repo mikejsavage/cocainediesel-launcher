@@ -101,7 +101,14 @@ static void launcher_main( bool autostart ) {
 		style.ItemSpacing.y = 8;
 	}
 
+	UpdaterState updater_state = UpdaterState_Init;
+
 	while( !glfwWindowShouldClose( window ) ) {
+		if( ( updater_state == UpdaterState_NeedsUpdate || updater_state == UpdaterState_ReadyToPlay ) && discord_state() != DiscordState_Authenticating )
+			glfwWaitEvents();
+		else
+			glfwPollEvents();
+
 		ImGui_ImplOpenGL2_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -137,13 +144,8 @@ static void launcher_main( bool autostart ) {
 			| ImGuiWindowFlags_NoScrollWithMouse
 		);
 
-		UpdaterState updater_state = updater_update();
+		updater_state = updater_update();
 		const char * discord_user_id = discord_step();
-
-		if( ( updater_state == UpdaterState_NeedsUpdate || updater_state == UpdaterState_ReadyToPlay ) && discord_state() != DiscordState_Authenticating )
-			glfwWaitEvents();
-		else
-			glfwPollEvents();
 
 		bool enter_key_pressed = glfwGetKey( window, GLFW_KEY_ENTER ) == GLFW_PRESS || glfwGetKey( window, GLFW_KEY_SPACE ) == GLFW_PRESS;
 
