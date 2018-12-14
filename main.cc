@@ -119,14 +119,7 @@ static void launcher_main( bool autostart ) {
 		ImGui::GetStyle().WindowPadding = ImVec2( 0, 0 );
 		ImGui::SetNextWindowPos( ImVec2() );
 		ImGui::SetNextWindowSize( ImVec2( window_size.x, logo_height ) );
-		ImGui::Begin( "logo", NULL, 0
-			| ImGuiWindowFlags_NoTitleBar
-			| ImGuiWindowFlags_NoResize
-			| ImGuiWindowFlags_NoMove
-			| ImGuiWindowFlags_NoCollapse
-			| ImGuiWindowFlags_NoScrollbar
-			| ImGuiWindowFlags_NoScrollWithMouse
-		);
+		ImGui::Begin( "logo", NULL, ImGuiWindowFlags_NoDecoration );
 
 		ImGui::Image( ( void * ) checked_cast< uptr >( tex ), ImVec2( 750, logo_height ) );
 
@@ -135,14 +128,7 @@ static void launcher_main( bool autostart ) {
 		ImGui::GetStyle().WindowPadding = ImVec2( 32, 16 );
 		ImGui::SetNextWindowPos( ImVec2( 0, logo_height ) );
 		ImGui::SetNextWindowSize( ImVec2( window_size.x, window_size.y - logo_height ) );
-		ImGui::Begin( "controls", NULL, 0
-			| ImGuiWindowFlags_NoTitleBar
-			| ImGuiWindowFlags_NoResize
-			| ImGuiWindowFlags_NoMove
-			| ImGuiWindowFlags_NoCollapse
-			| ImGuiWindowFlags_NoScrollbar
-			| ImGuiWindowFlags_NoScrollWithMouse
-		);
+		ImGui::Begin( "controls", NULL, ImGuiWindowFlags_NoDecoration );
 
 		updater_state = updater_update();
 		const char * discord_user_id = discord_step();
