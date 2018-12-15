@@ -150,7 +150,7 @@ static void chacha20_init_key(crypto_chacha_ctx *ctx, const u8 key[32])
 static u8 chacha20_pool_byte(crypto_chacha_ctx *ctx)
 {
     u32 pool_word = ctx->pool[ctx->pool_idx >> 2];
-    u8  pool_byte = pool_word >> (8*(ctx->pool_idx & 3));
+    u8  pool_byte = (u8)(pool_word >> (8*(ctx->pool_idx & 3)));
     ctx->pool_idx++;
     return pool_byte;
 }
@@ -482,6 +482,8 @@ static void blake2b_compress(crypto_blake2b_ctx *ctx, int is_last_block)
         { 13, 11,  7, 14, 12,  1,  3,  9,  5,  0, 15,  4,  8,  6,  2, 10 },
         {  6, 15, 14,  9, 11,  3,  0,  8, 12,  2, 13,  7,  1,  4, 10,  5 },
         { 10,  2,  8,  4,  7,  6,  1,  5, 15, 11,  9, 14,  3, 12, 13,  0 },
+        {  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15 },
+        { 14, 10,  4,  8,  9, 15, 13,  6,  1, 12,  0,  2, 11,  7,  5,  3 },
     };
 
     // init work vector
@@ -511,9 +513,15 @@ static void blake2b_compress(crypto_blake2b_ctx *ctx, int is_last_block)
     BLAKE2_G(v, 2, 7,  8, 13, input[sigma[i][12]], input[sigma[i][13]]);\
     BLAKE2_G(v, 3, 4,  9, 14, input[sigma[i][14]], input[sigma[i][15]])
 
+#ifdef BLAKE2_NO_UNROLLING
+    FOR (i, 0, 12) {
+        BLAKE2_ROUND(i);
+    }
+#else
     BLAKE2_ROUND(0);  BLAKE2_ROUND(1);  BLAKE2_ROUND(2);  BLAKE2_ROUND(3);
     BLAKE2_ROUND(4);  BLAKE2_ROUND(5);  BLAKE2_ROUND(6);  BLAKE2_ROUND(7);
     BLAKE2_ROUND(8);  BLAKE2_ROUND(9);  BLAKE2_ROUND(0);  BLAKE2_ROUND(1);
+#endif
 
     // update hash
     ctx->hash[0] ^= v0 ^ v8;
@@ -1264,7 +1272,7 @@ static int fe_isnonzero(const fe f)
 {
     u8 s[32];
     fe_tobytes(s, f);
-    u8 isnonzero = zerocmp32(s);
+    int isnonzero = zerocmp32(s);
     WIPE_BUFFER(s);
     return isnonzero;
 }
@@ -1280,7 +1288,7 @@ static void trim_scalar(u8 s[32])
     s[31] |= 64;
 }
 
-static int scalar_bit(const u8 s[32], int i) { return (s[i>>3] >> (i&7)) & 1; }
+static int scalar_bit(const u8 s[32], size_t i) {return (s[i>>3] >> (i&7)) & 1;}
 
 int crypto_x25519(u8       raw_shared_secret[32],
                   const u8 your_secret_key  [32],
@@ -1559,6 +1567,14 @@ static void ge_madd(ge *s, const ge *p, const fe yp, const fe ym, const fe t2,
     fe_mul(s->Z, a   , b   );
 }
 
+static void ge_msub(ge *s, const ge *p, const fe yp, const fe ym, const fe t2,
+                    fe a, fe b)
+{
+    fe n2;
+    fe_neg(n2, t2);
+    ge_madd(s, p, ym, yp, n2, a, b);
+}
+
 static void ge_double(ge *s, const ge *p, ge *q)
 {
     fe_sq (q->X, p->X);
@@ -1577,22 +1593,77 @@ static void ge_double(ge *s, const ge *p, ge *q)
     fe_mul(s->T, q->X , q->T);
 }
 
-// Compute signed sliding windows (either 0, or odd numbers between -15 and 15)
-static void slide(i8 adds[258], const u8 scalar[32])
+static const fe window_Yp[8] = {
+    {25967493, -14356035, 29566456, 3660896, -12694345,
+     4014787, 27544626, -11754271, -6079156, 2047605},
+    {15636291, -9688557, 24204773, -7912398, 616977,
+     -16685262, 27787600, -14772189, 28944400, -1550024},
+    {10861363, 11473154, 27284546, 1981175, -30064349,
+     12577861, 32867885, 14515107, -15438304, 10819380},
+    {5153746, 9909285, 1723747, -2777874, 30523605,
+     5516873, 19480852, 5230134, -23952439, -15175766},
+    {-22518993, -6692182, 14201702, -8745502, -23510406,
+     8844726, 18474211, -1361450, -13062696, 13821877},
+    {-25154831, -4185821, 29681144, 7868801, -6854661,
+     -9423865, -12437364, -663000, -31111463, -16132436},
+    {-33521811, 3180713, -2394130, 14003687, -16903474,
+     -16270840, 17238398, 4729455, -18074513, 9256800},
+    {-3151181, -5046075, 9282714, 6866145, -31907062,
+     -863023, -18940575, 15033784, 25105118, -7894876},
+};
+static const fe window_Ym[8] = {
+    {-12545711, 934262, -2722910, 3049990, -727428,
+     9406986, 12720692, 5043384, 19500929, -15469378},
+    {16568933, 4717097, -11556148, -1102322, 15682896,
+     -11807043, 16354577, -11775962, 7689662, 11199574},
+    {4708026, 6336745, 20377586, 9066809, -11272109,
+     6594696, -25653668, 12483688, -12668491, 5581306},
+    {-30269007, -3463509, 7665486, 10083793, 28475525,
+     1649722, 20654025, 16520125, 30598449, 7715701},
+    {-6455177, -7839871, 3374702, -4740862, -27098617,
+     -10571707, 31655028, -7212327, 18853322, -14220951},
+    {25576264, -2703214, 7349804, -11814844, 16472782,
+     9300885, 3844789, 15725684, 171356, 6466918},
+    {-25182317, -4174131, 32336398, 5036987, -21236817,
+     11360617, 22616405, 9761698, -19827198, 630305},
+    {-24326370, 15950226, -31801215, -14592823, -11662737,
+     -5090925, 1573892, -2625887, 2198790, -15804619},
+};
+static const fe window_T2[8] = {
+    {-8738181, 4489570, 9688441, -14785194, 10184609,
+     -12363380, 29287919, 11864899, -24514362, -4438546},
+    {30464156, -5976125, -11779434, -15670865, 23220365,
+     15915852, 7512774, 10017326, -17749093, -9920357},
+    {19563160, 16186464, -29386857, 4097519, 10237984,
+     -4348115, 28542350, 13850243, -23678021, -15815942},
+    {28881845, 14381568, 9657904, 3680757, -20181635,
+     7843316, -31400660, 1370708, 29794553, -1409300},
+    {4566830, -12963868, -28974889, -12240689, -7602672,
+     -2830569, -8514358, -10431137, 2207753, -3209784},
+    {23103977, 13316479, 9739013, -16149481, 817875,
+     -15038942, 8965339, -14088058, -30714912, 16193877},
+    {-13720693, 2639453, -24237460, -7406481, 9494427,
+     -5774029, -6554551, -15960994, -2449256, -14291300},
+    {-3099351, 10324967, -2241613, 7453183, -5446979,
+     -2735503, -13812022, -16236442, -32461234, -12290683},
+};
+
+// Compute signed sliding windows (either 0, or odd numbers)
+static void slide(size_t width, i8 *adds, const u8 scalar[32])
 {
-    FOR (i,   0, 256) { adds[i] = scalar_bit(scalar, i); }
-    FOR (i, 256, 258) { adds[i] = 0;                     }
+    FOR (i,   0, 256        ) { adds[i] = (i8)scalar_bit(scalar, i); }
+    FOR (i, 256, 253 + width) { adds[i] = 0;                         }
     FOR (i, 0, 254) {
         if (adds[i] != 0) {
-            // base value of the 5-bit window
-            FOR (j, 1, 5) {
+            // base value of the window
+            FOR (j, 1, width) {
                 adds[i  ] |= adds[i+j] << j;
                 adds[i+j]  = 0;
             }
-            if (adds[i] > 16) {
-                // go back to [-15, 15], propagate carry.
-                adds[i] -= 32;
-                int j = i + 5;
+            if (adds[i] > (1 << (width - 1))) {
+                // go back to [-half_range, half_range], propagate carry.
+                adds[i] -= 1 << width;
+                size_t j = i + width;
                 while (adds[j] != 0) {
                     adds[j] = 0;
                     j++;
@@ -1603,42 +1674,31 @@ static void slide(i8 adds[258], const u8 scalar[32])
     }
 }
 
-// Look up table for sliding windows
-static void ge_precompute(ge_cached lut[8], const ge *P1)
-{
-    ge P2, tmp;
-    ge_double(&P2, P1, &tmp);
-    ge_cache(&lut[0], P1);
-    FOR (i, 0, 7) {
-        ge_add(&tmp, &P2, &lut[i]);
-        ge_cache(&lut[i+1], &tmp);
-    }
-}
-
-// Could be a function, but the macro avoids some overhead.
-#define LUT_ADD(sum, lut, adds, i)                             \
-    if (adds[i] > 0) { ge_add(sum, sum, &lut[ adds[i] / 2]); } \
-    if (adds[i] < 0) { ge_sub(sum, sum, &lut[-adds[i] / 2]); }
+#define P_WINDOW_WIDTH 3 // Affects the size of the stack
+#define B_WINDOW_WIDTH 5 // Affects the size of the binary
+#define P_WINDOW_SIZE  (1<<(P_WINDOW_WIDTH-2))
+#define B_WINDOW_SIZE  (1<<(B_WINDOW_WIDTH-2))
 
 // Variable time! P, sP, and sB must not be secret!
 static void ge_double_scalarmult_vartime(ge *sum, const ge *P,
                                          u8 p[32], u8 b[32])
 {
-    static const fe X = { -14297830, -7645148, 16144683, -16471763, 27570974,
-                          -2696100, -26142465, 8378389, 20764389, 8758491 };
-    static const fe Y = { -26843541, -6710886, 13421773, -13421773, 26843546,
-                          6710886, -13421773, 13421773, -26843546, -6710886 };
-    ge B;
-    fe_copy(B.X, X);
-    fe_copy(B.Y, Y);
-    fe_1   (B.Z);
-    fe_mul (B.T, X, Y);
+    // cache P window for addition
+    ge_cached cP[P_WINDOW_SIZE];
+    ge tmp;
+    {
+        ge P2;
+        ge_double(&P2, P, &tmp);
+        ge_cache(&cP[0], P);
+        FOR (i, 0, (P_WINDOW_SIZE)-1) {
+            ge_add(&tmp, &P2, &cP[i]);
+            ge_cache(&cP[i+1], &tmp);
+        }
+    }
 
-    // cached points for addition
-    ge_cached cP[8];  ge_precompute(cP,  P);
-    ge_cached cB[8];  ge_precompute(cB, &B);
-    i8 p_adds[258];   slide(p_adds, p);
-    i8 b_adds[258];   slide(b_adds, b);
+    // Compute the indices for the windows
+    i8 p_adds[253 + P_WINDOW_WIDTH];  slide(P_WINDOW_WIDTH, p_adds, p);
+    i8 b_adds[253 + B_WINDOW_WIDTH];  slide(B_WINDOW_WIDTH, b_adds, b);
 
     // Avoid the first doublings
     int i = 253;
@@ -1649,14 +1709,24 @@ static void ge_double_scalarmult_vartime(ge *sum, const ge *P,
     }
 
     // Merged double and add ladder
+    fe t1, t2;
+#define CACHED_ADD(i)                                              \
+    if (p_adds[i] > 0) { ge_add(sum, sum, &cP[ p_adds[i] / 2]); }  \
+    if (p_adds[i] < 0) { ge_sub(sum, sum, &cP[-p_adds[i] / 2]); }  \
+    if (b_adds[i] > 0) { ge_madd(sum, sum,                         \
+                                 window_Yp[ b_adds[i] / 2],            \
+                                 window_Ym[ b_adds[i] / 2],            \
+                                 window_T2[ b_adds[i] / 2], t1, t2); } \
+    if (b_adds[i] < 0) { ge_msub(sum, sum,                             \
+                                 window_Yp[-b_adds[i] / 2],            \
+                                 window_Ym[-b_adds[i] / 2],            \
+                                 window_T2[-b_adds[i] / 2], t1, t2); }
     ge_zero(sum);
-    LUT_ADD(sum, cP, p_adds, i);
-    LUT_ADD(sum, cB, b_adds, i);
+    CACHED_ADD(i);
     i--;
     while (i >= 0) {
-        ge_double(sum, sum, &B); // B is no longer used, we can overwrite it
-        LUT_ADD(sum, cP, p_adds, i);
-        LUT_ADD(sum, cB, b_adds, i);
+        ge_double(sum, sum, &tmp);
+        CACHED_ADD(i);
         i--;
     }
 }
@@ -1796,11 +1866,11 @@ static void ge_scalarmult_base(ge *p, const u8 scalar[32])
         fe_1(yp);
         fe_1(ym);
         fe_0(t2);
-        u8 teeth =  scalar_bit(s_scalar, i)
-            +      (scalar_bit(s_scalar, i +  51) << 1)
-            +      (scalar_bit(s_scalar, i + 102) << 2)
-            +      (scalar_bit(s_scalar, i + 153) << 3)
-            +      (scalar_bit(s_scalar, i + 204) << 4);
+        u8 teeth = (u8)((scalar_bit(s_scalar, i)           ) +
+                        (scalar_bit(s_scalar, i +  51) << 1) +
+                        (scalar_bit(s_scalar, i + 102) << 2) +
+                        (scalar_bit(s_scalar, i + 153) << 3) +
+                        (scalar_bit(s_scalar, i + 204) << 4));
         u8 high  = teeth >> 4;
         u8 index = (teeth ^ (high - 1)) & 15;
         FOR (j, 0, 16) {
@@ -1964,11 +2034,8 @@ int crypto_key_exchange(u8       shared_key[32],
                         const u8 your_secret_key [32],
                         const u8 their_public_key[32])
 {
-    u8 raw_shared_secret[32];
-    int status = crypto_x25519(raw_shared_secret,
-                               your_secret_key, their_public_key);
-    crypto_chacha20_H(shared_key, raw_shared_secret, zero);
-    WIPE_BUFFER(raw_shared_secret);
+    int status = crypto_x25519(shared_key, your_secret_key, their_public_key);
+    crypto_chacha20_H(shared_key, shared_key, zero);
     return status;
 }
 
