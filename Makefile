@@ -1,22 +1,29 @@
 all: debug
 .PHONY: debug asan release clean
 
+LUA = scripts/lua.linux
+NINJA = scripts/ninja.linux
+ifeq ($(OS),Windows_NT)
+	LUA = scripts/lua.exe
+	NINJA = scripts/ninja.exe
+endif
+
 debug:
-	@scripts/lua.linux make.lua > build.ninja
-	@scripts/ninja.linux
+	@$(LUA) make.lua > build.ninja
+	@$(NINJA)
 
 asan:
-	@scripts/lua.linux make.lua asan > build.ninja
-	@scripts/ninja.linux
+	@$(LUA) make.lua asan > build.ninja
+	@$(NINJA)
 
 release:
-	@scripts/lua.linux make.lua release > build.ninja
-	@scripts/ninja.linux
+	@$(LUA) make.lua release > build.ninja
+	@$(NINJA)
 
 clean:
-	@scripts/lua.linux make.lua debug > build.ninja
-	@scripts/ninja.linux -t clean || true
-	@scripts/lua.linux make.lua asan > build.ninja
-	@scripts/ninja.linux -t clean || true
+	@$(LUA) make.lua debug > build.ninja
+	@$(NINJA) -t clean || true
+	@$(LUA) make.lua asan > build.ninja
+	@$(NINJA) -t clean || true
 	@rm -rf build release
 	@rm -f build.ninja
