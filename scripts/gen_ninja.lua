@@ -236,6 +236,7 @@ msvc_obj_replace_cxxflags = toolchain_helper( "msvc", obj_replace_cxxflags )
 gcc_obj_cxxflags = toolchain_helper( "gcc", obj_cxxflags )
 gcc_obj_replace_cxxflags = toolchain_helper( "gcc", obj_replace_cxxflags )
 
+printf( "builddir = build" )
 printf( "cxxflags = %s", cxxflags )
 printf( "ldflags = %s", ldflags )
 

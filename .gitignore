@@ -2,8 +2,6 @@ build
 release
 
 build.ninja
-.ninja_deps
-.ninja_log
 
 *.exe
 *.pdb
