@@ -6,6 +6,9 @@ build_script:
 - cmd: call "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" x86_amd64
 - cmd: scripts\lua.exe make.lua release > build.ninja
 - cmd: scripts\ninja.exe -v -k 0
+- cmd: scripts\ducible.exe release\cocainediesel.exe
+- cmd: scripts\ducible.exe release\elevate_for_update.exe
+- cmd: scripts\ducible.exe release\headlessupdater.exe
 - cmd: makensis.exe installer\installer.nsi
 
 artifacts:
