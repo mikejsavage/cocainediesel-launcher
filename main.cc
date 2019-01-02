@@ -68,7 +68,7 @@ static void launcher_main( bool autostart ) {
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplGlfw_InitForOpenGL( window, true );
 	ImGui_ImplOpenGL2_Init();
 
 	glfwSwapInterval( 2 );
