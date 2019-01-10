@@ -28,8 +28,7 @@ Section "Install" SectionInstall
 	File LGPL2.txt
 
 	# Start menu shortcut
-	CreateDirectory "$SMPROGRAMS\Cocaine Diesel"
-	CreateShortCut "$SMPROGRAMS\Cocaine Diesel\Cocaine Diesel.lnk" "$INSTDIR\cocainediesel.exe"
+	CreateShortCut "$SMPROGRAMS\Cocaine Diesel.lnk" "$INSTDIR\cocainediesel.exe"
 
 	# Uninstaller
 	WriteUninstaller "$INSTDIR\uninstall.exe"
@@ -90,6 +89,7 @@ Section "Uninstall"
 	# Start menu shortcut
 	Delete "$SMPROGRAMS\Cocaine Diesel\Cocaine Diesel.lnk"
 	RMDir "$SMPROGRAMS\Cocaine Diesel"
+	Delete "$SMPROGRAMS\Cocaine Diesel.lnk"
 
 	# Registry keys
 	SetRegView 64
