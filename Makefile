@@ -3,7 +3,9 @@ all: debug
 
 LUA = scripts/lua.linux
 NINJA = scripts/ninja.linux
-ifeq ($(OS),Windows_NT)
+
+WSLENV ?= notwsl
+ifndef WSLENV
 	LUA = scripts/lua.exe
 	NINJA = scripts/ninja.exe
 endif
