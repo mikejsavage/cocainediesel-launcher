@@ -239,7 +239,7 @@ static void launcher_main( bool autostart ) {
 
 #if PLATFORM_WINDOWS
 
-int WinMain( HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int nShowCmd ) {
+int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int nShowCmd ) {
 	bool autostart = strcmp( lpszCmdLine, "--start-update" ) == 0;
 	launcher_main( autostart );
 
