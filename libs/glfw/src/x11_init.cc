@@ -883,7 +883,7 @@ int _glfwPlatformInit(void)
         }
     }
 
-#if defined(__linux__)
+#if defined(__linux__) && 0
     if (!_glfwInitJoysticksLinux())
         return GLFW_FALSE;
 #endif
