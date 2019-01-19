@@ -17,6 +17,11 @@ SetCompressor lzma
 !insertmacro MUI_UNPAGE_INSTFILES
 
 Section "Install" SectionInstall
+!ifdef ONLY_WRITE_UNINSTALLER
+	WriteUninstaller "$EXEDIR\uninstall.exe"
+	Quit
+!endif
+
 	# Install stuff
 	SetOutPath $INSTDIR
 	File ..\release\cocainediesel.exe
