@@ -19,6 +19,7 @@ SetCompressor lzma
 Section "Install" SectionInstall
 !ifdef ONLY_WRITE_UNINSTALLER
 	WriteUninstaller "$EXEDIR\uninstall.exe"
+	SetErrorLevel 0
 	Quit
 !endif
 
