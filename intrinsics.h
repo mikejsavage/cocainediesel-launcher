@@ -96,11 +96,12 @@ struct ScopeExit {
 	F f;
 };
 
-template< typename F >
-inline ScopeExit< F > MakeScopeExit( F f ) {
-	return ScopeExit< F >( f );
+struct DeferHelper {
+	template< typename F >
+	ScopeExit< F > operator+( F f ) { return f; }
 };
-#define SCOPE_EXIT( code ) auto COUNTER_NAME( SCOPE_EXIT_ ) = MakeScopeExit( [&]() { code; } )
+
+#define defer const auto & COUNTER_NAME( DEFER_ ) = DeferHelper() + [&]()
 
 template< typename S, typename T >
 struct SameType {

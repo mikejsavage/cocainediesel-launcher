@@ -299,7 +299,7 @@ static void set_registry_key( HKEY hkey, const char * path, const char * value, 
 		log( "Couldn't open registry key {} {} ({})", path, value, ok_open );
 		return;
 	}
-	SCOPE_EXIT( RegCloseKey( key ) );
+	defer { RegCloseKey( key ); };
 
 	LONG ok_set = RegSetValueExA( key, value, 0, REG_SZ, ( const BYTE * ) data, checked_cast< DWORD >( strlen( data ) + 1 ) );
 	if( ok_set != ERROR_SUCCESS ) {
@@ -314,7 +314,7 @@ static void set_registry_key( HKEY hkey, const char * path, const char * value, 
 		log( "Couldn't open registry key {} {} ({})", path, value, ok_open );
 		return;
 	}
-	SCOPE_EXIT( RegCloseKey( key ) );
+	defer { RegCloseKey( key ); };
 
 	LONG ok_set = RegSetValueExA( key, value, 0, REG_DWORD, ( const BYTE * ) &data, sizeof( data ) );
 	if( ok_set != ERROR_SUCCESS ) {
