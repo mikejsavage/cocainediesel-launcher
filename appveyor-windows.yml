@@ -16,5 +16,4 @@ build_script:
 artifacts:
 - path: installer/CocaineDieselInstaller.exe
 - path: release
-  path: installer/uninstall.exe
   name: launcher_windows
