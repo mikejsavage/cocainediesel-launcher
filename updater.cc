@@ -21,7 +21,7 @@
 
 #include "libs/whereami/whereami.h"
 
-#define HOST "https://cocainediesel.mikejsavage.co.uk"
+#define HOST "https://update.cocainediesel.fun"
 
 #define HEX256_PATTERN "%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x"
 
