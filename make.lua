@@ -10,7 +10,7 @@ require( "libs/whereami" )
 bin( "cocainediesel", {
 	srcs = {
 		"main.cc", "updater.cc", "ggformat.cc", "strlcpy.cc", "strtonum.cc", "patterns.cc",
-		"platform_taskbar.cc", "gl.cc", "glad.cc", "liberation.cc", "png.cc", "discord.cc",
+		"platform_taskbar.cc", "gl.cc", "glad.cc", "png.cc", "discord.cc",
 	},
 
 	libs = { "glfw", "imgui", "monocypher", "picohttpparser", "stb_image", "stb_truetype", "whereami" },

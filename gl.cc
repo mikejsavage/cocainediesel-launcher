@@ -125,8 +125,8 @@ GLFWwindow * gl_init() {
 
 	glfwWindowHint( GLFW_RESIZABLE, 0 );
 
-	int width = 750;
-	int height = 500;
+	int width = 691;
+	int height = 518;
 
 	GLFWmonitor * monitor = glfwGetPrimaryMonitor();
 	const GLFWvidmode * mode = glfwGetVideoMode( monitor );
