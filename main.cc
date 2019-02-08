@@ -46,7 +46,7 @@ static const char * discord_step() {
 	DiscordState state = discord_update();
 
 	if( state == DiscordState_Unauthenticated ) {
-		bool login = ImGui::Button( "Link with with Discord" );
+		bool login = ImGui::Button( "Link with Discord" );
 		if( login ) {
 			discord_login();
 		}
