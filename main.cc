@@ -52,10 +52,12 @@ static const char * discord_step() {
 		}
 	}
 	else if( state == DiscordState_Authenticating ) {
+		ImGui::AlignTextToFramePadding();
 		ImGui::Text( "Linking... check your browser" );
 	}
 	else if( state == DiscordState_Authenticated ) {
 		DiscordUser user = discord_user();
+		ImGui::AlignTextToFramePadding();
 		ImGui::Text( "Hi %s#%s. Run the game and then you won't need to do this again", user.username, user.discriminator );
 		return user.id;
 	}
@@ -138,7 +140,6 @@ static void launcher_main( bool autostart ) {
 
 		ImGui::End();
 
-		float logo_height = 225;
 		ImGui::GetStyle().WindowPadding = ImVec2( 32, 16 );
 		ImGui::SetNextWindowPos( ImVec2( 0, 0 ) );
 		ImGui::SetNextWindowSize( ImVec2( window_size.x, window_size.y ) );
