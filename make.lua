@@ -13,7 +13,7 @@ bin( "cocainediesel", {
 		"platform_taskbar.cc", "gl.cc", "glad.cc", "png.cc", "discord.cc",
 	},
 
-	libs = { "glfw", "imgui", "monocypher", "picohttpparser", "stb_image", "stb_truetype", "whereami" },
+	libs = { "glfw", "imgui", "monocypher", "picohttpparser", "stb_image", "whereami" },
 	prebuilt_libs = { "curl", OS == "linux" and "mbedtls" or nil },
 
 	rc = "cocainediesel_manifest",
