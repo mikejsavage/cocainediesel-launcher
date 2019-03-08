@@ -20,4 +20,5 @@ rm launcher_linux.zip
 
 cp ../installer/*.txt .
 rm base/*.md base/findusedtextures.lua
+rm -r base/models/mapobjects base/models/objects/jumppad.md3
 rm *.exp *.lib **/*.exp **/*.lib
