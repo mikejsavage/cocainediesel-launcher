@@ -106,7 +106,7 @@ static void launcher_main( bool autostart ) {
 		ImGuiStyle & style = ImGui::GetStyle();
 		style.WindowRounding = 0;
 		style.FramePadding = ImVec2( 8, 8 );
-		style.FrameBorderSize = 2;
+		style.FrameBorderSize = 3;
 		style.WindowBorderSize = 0;
 		style.Colors[ ImGuiCol_Border ] = ImColor( 0xee, 0xee, 0xee, 0xee );
 		style.Colors[ ImGuiCol_Button ] = ImColor( 0, 0, 0, 0 );
@@ -152,8 +152,10 @@ static void launcher_main( bool autostart ) {
 
 		const ImVec2 log_size = ImVec2( 0, 310 );
 		if( show_log ) {
-			if( ImGui::Button( "Hide log" ) )
+			if( ImGui::Button( "Hide log" ) ) {
 				show_log = false;
+				glfwPostEmptyEvent();
+			}
 
 			ImGui::PushStyleColor( ImGuiCol_FrameBg, IM_COL32( 0, 0, 0, 128 ) );
 			ImGui::BeginChildFrame( 1337, log_size, ImGuiWindowFlags_AlwaysVerticalScrollbar );
@@ -166,8 +168,10 @@ static void launcher_main( bool autostart ) {
 			ImGui::PopStyleColor();
 		}
 		else {
-			if( ImGui::Button( "Show log" ) )
+			if( ImGui::Button( "Show log" ) ) {
 				show_log = true;
+				glfwPostEmptyEvent();
+			}
 			ImGui::Dummy( log_size );
 		}
 
