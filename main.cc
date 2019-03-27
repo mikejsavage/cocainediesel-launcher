@@ -146,7 +146,8 @@ static void launcher_main( bool autostart ) {
 		ImGui::Begin( "controls", NULL, ImGuiWindowFlags_NoDecoration );
 
 		updater_state = updater_update();
-		const char * discord_user_id = discord_step();
+		// const char * discord_user_id = discord_step();
+		const char * discord_user_id = NULL;
 
 		ImGui::SameLine();
 
