@@ -215,13 +215,20 @@ static void launcher_main( bool autostart ) {
 
 			taskbar_progress( window, updater_bytes_downloaded(), updater_update_size() );
 		}
-		else if( updater_state == UpdaterState_InstallingUpdate ) {
-			ImGui::Button( "Installing update...", ImVec2( -1, 50 ) );
-
-			taskbar_clear( window );
-		}
 		else {
-			ImGui::Button( "Checking for updates...", ImVec2( -1, 50 ) );
+			ImGui::PushStyleColor( ImGuiCol_ButtonHovered, IM_COL32( 0, 0, 0, 0 ) );
+			ImGui::PushStyleColor( ImGuiCol_ButtonActive, IM_COL32( 0, 0, 0, 0 ) );
+
+			if( updater_state == UpdaterState_InstallingUpdate ) {
+				ImGui::Button( "Installing update...", ImVec2( -1, 50 ) );
+
+				taskbar_clear( window );
+			}
+			else {
+				ImGui::Button( "Checking for updates...", ImVec2( -1, 50 ) );
+			}
+
+			ImGui::PopStyleColor( 2 );
 		}
 
 		ImGui::PopFont();
