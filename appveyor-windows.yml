@@ -9,9 +9,9 @@ build_script:
 - cmd: scripts\ducible.exe release\cocainediesel.exe
 - cmd: scripts\ducible.exe release\elevate_for_update.exe
 - cmd: scripts\ducible.exe release\headlessupdater.exe
-- cmd: makensis.exe -DONLY_WRITE_UNINSTALLER installer\installer.nsi
+- cmd: "C:\\Program Files (x86)\\NSIS\\makensis.exe" -DONLY_WRITE_UNINSTALLER installer\installer.nsi
 - cmd: installer\CocaineDieselInstaller.exe /S
-- cmd: makensis.exe installer\installer.nsi
+- cmd: "C:\\Program Files (x86)\\NSIS\\makensis.exe" installer\installer.nsi
 
 artifacts:
 - path: installer/CocaineDieselInstaller.exe
