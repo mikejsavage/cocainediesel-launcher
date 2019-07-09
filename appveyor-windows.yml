@@ -2,7 +2,7 @@ version: "{build}"
 clone_depth: 1
 image: Visual Studio 2019
 
-before build:
+build_script:
 - ps: Write-Host "Installing NSIS 3.04 ..." -ForegroundColor Cyan
 - ps: $exePath = "$($env:TEMP)\nsis-3.04-setup.exe"
 - ps: Write-Host "Downloading..."
@@ -13,8 +13,6 @@ before build:
 - ps: Write-Host "Installed" -ForegroundColor Green
 - ps: Add-Path 'C:\Program Files (x86)\NSIS'
 - ps: Add-SessionPath 'C:\Program Files (x86)\NSIS'
-
-build_script:
 - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
 - scripts\lua.exe make.lua release > build.ninja
 - scripts\ninja.exe -v -k 0
