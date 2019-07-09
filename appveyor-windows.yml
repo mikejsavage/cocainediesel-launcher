@@ -2,6 +2,21 @@ version: "{build}"
 clone_depth: 1
 image: Visual Studio 2019
 
+before build:
+- ps: Write-Host "Installing NSIS 3.04 ..." -ForegroundColor Cyan
+- ps: $exePath = "$($env:TEMP)\nsis-3.04-setup.exe"
+
+- ps: Write-Host "Downloading..."
+- ps: (New-Object Net.WebClient).DownloadFile('https://downloads.sourceforge.net/project/nsis/NSIS%203/3.04/nsis-3.04-setup.exe', $exePath)
+
+- ps: Write-Host "Installing..."
+- ps: cmd /c start /wait $exePath /S
+- ps: del $exePath
+- ps: Write-Host "Installed" -ForegroundColor Green
+
+- ps: Add-Path 'C:\Program Files (x86)\NSIS'
+- ps: Add-SessionPath 'C:\Program Files (x86)\NSIS'
+
 build_script:
 - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
 - scripts\lua.exe make.lua release > build.ninja
@@ -9,9 +24,9 @@ build_script:
 - scripts\ducible.exe release\cocainediesel.exe
 - scripts\ducible.exe release\elevate_for_update.exe
 - scripts\ducible.exe release\headlessupdater.exe
-- '"C:\Program Files (x86)\NSIS\makensis.exe" -DONLY_WRITE_UNINSTALLER installer\installer.nsi'
+- makensis.exe -DONLY_WRITE_UNINSTALLER installer\installer.nsi
 - installer\CocaineDieselInstaller.exe /S
-- '"C:\Program Files (x86)\NSIS\makensis.exe" installer\installer.nsi'
+- makensis.exe installer\installer.nsi
 
 artifacts:
 - path: installer/CocaineDieselInstaller.exe
