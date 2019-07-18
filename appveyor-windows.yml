@@ -21,6 +21,7 @@ build_script:
 - scripts\ducible.exe release\headlessupdater.exe
 - makensis.exe -DONLY_WRITE_UNINSTALLER installer\installer.nsi
 - installer\CocaineDieselInstaller.exe /S
+- scripts\ducible.exe release\uninstall.exe
 - makensis.exe installer\installer.nsi
 
 artifacts:
