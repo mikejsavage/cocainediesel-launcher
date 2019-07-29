@@ -250,7 +250,7 @@ You can distribute the binary unmodified, you can't sell it or use the code.
 Monocypher
 ----------
 
-Copyright (c) 2017, Loup Vaillant
+Copyright (c) 2017-2019, Loup Vaillant
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
