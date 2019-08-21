@@ -32,7 +32,7 @@ bin( "headlessupdater", {
 } )
 
 if OS == "windows" then
-        bin( "elevate_for_update", {
+	bin( "elevate_for_update", {
 		srcs = { "elevate_for_update.cc", "ggformat.cc" },
 		rc = "elevate_for_update_manifest",
 	} )

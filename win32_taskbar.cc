@@ -14,17 +14,17 @@ void taskbar_init() {
 }
 
 void taskbar_term() {
-        taskbar->Release();
-        CoUninitialize();
+	taskbar->Release();
+	CoUninitialize();
 }
 
 void taskbar_progress( GLFWwindow * window, u64 completed, u64 total ) {
 	HWND hwnd = glfwGetWin32Window( window );
-        taskbar->SetProgressState( hwnd, TBPF_NORMAL );
-        taskbar->SetProgressValue( hwnd, completed, total );
+	taskbar->SetProgressState( hwnd, TBPF_NORMAL );
+	taskbar->SetProgressValue( hwnd, completed, total );
 }
 
 void taskbar_clear( GLFWwindow * window ) {
 	HWND hwnd = glfwGetWin32Window( window );
-        taskbar->SetProgressState( hwnd, TBPF_NOPROGRESS );
+	taskbar->SetProgressState( hwnd, TBPF_NOPROGRESS );
 }

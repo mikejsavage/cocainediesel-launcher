@@ -363,7 +363,7 @@ static void download( const char * url, Download * reuse = NULL ) {
 	try_set_opt( curl, CURLOPT_URL, url );
 	try_set_opt( curl, CURLOPT_WRITEFUNCTION, data_received );
 	try_set_opt( curl, CURLOPT_FOLLOWLOCATION, 1l );
-        try_set_opt( curl, CURLOPT_NOSIGNAL, 1l );
+	try_set_opt( curl, CURLOPT_NOSIGNAL, 1l );
 	try_set_opt( curl, CURLOPT_CONNECTTIMEOUT, 10l );
 	try_set_opt( curl, CURLOPT_LOW_SPEED_TIME, 10l );
 	try_set_opt( curl, CURLOPT_LOW_SPEED_LIMIT, 10l );
