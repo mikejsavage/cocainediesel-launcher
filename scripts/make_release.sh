@@ -5,9 +5,9 @@ find . -type f | xargs chmod 644
 mkdir release
 
 file_platform() {
-	if [ "${1: -4}" = ".exe" ] || [ "${1: -4}" = ".dll" ]; then
+	if [ "${1: -4}" = ".exe" ]; then
 		echo " windows64"
-	elif [ "$1" = "client" ] || [ "$1" = "server" ] || [ "$1" = "cocainediesel" ] || [ "$1" = "headlessupdater" ] || [ "${1: -3}" = ".so" ]; then
+	elif [ "$1" = "client" ] || [ "$1" = "server" ] || [ "$1" = "cocainediesel" ] || [ "$1" = "headlessupdater" ]; then
 		echo " linux64"
 	fi
 }
