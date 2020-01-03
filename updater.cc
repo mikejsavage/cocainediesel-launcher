@@ -391,7 +391,7 @@ static void download( const char * url, Download * reuse = NULL ) {
 static bool parse_version( Version * v, const char * str ) {
 	int fields = sscanf( str, "%u.%u.%u.%u", &v->a, &v->b, &v->c, &v->d );
 	if( fields != 4 ) {
-		v = { };
+		*v = { };
 		return false;
 	}
 	return true;

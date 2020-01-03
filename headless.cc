@@ -21,11 +21,10 @@ int main() {
 		}
 		else if( state == UpdaterState_NeedsUpdate ) {
 			ggprint( "Updating to {}\n", updater_remote_version() );
-			state = UpdaterState_StartUpdate;
 		}
 		else if( state == UpdaterState_DownloadingUpdate ) {
 			float progress = updater_download_progress();
-			
+
 			const char * unit = "KB/s";
 			double display_speed = updater_download_speed() / 1000.0;
 			if( display_speed > 1000.0 ) {
