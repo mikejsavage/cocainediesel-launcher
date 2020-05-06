@@ -19,6 +19,6 @@ rm launcher_windows.zip
 rm launcher_linux.zip
 
 cp ../installer/*.txt .
-rm base/*.md base/.gitignore base/findusedtextures.lua
+rm base/*.md base/.gitignore
 rm -r base/models/mapobjects base/models/objects/jumppad.md3
 rm *.exp *.lib
