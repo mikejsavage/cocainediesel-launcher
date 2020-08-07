@@ -547,7 +547,7 @@ static UpdaterState updater_update( bool wait ) {
 		curl_easy_getinfo( msg->easy_handle, CURLINFO_PRIVATE, &dl );
 
 		long http_status;
-		curl_easy_getinfo( msg->easy_handle, CURLINFO_RESPONSE_CODE, &http_status ); 
+		curl_easy_getinfo( msg->easy_handle, CURLINFO_RESPONSE_CODE, &http_status );
 
 		if( msg->data.result == CURLE_OK && http_status / 100 == 2 ) {
 			dl->state = DownloadState_Done;
@@ -557,6 +557,7 @@ static UpdaterState updater_update( bool wait ) {
 		}
 
 		curl_multi_remove_handle( curl_multi, msg->easy_handle );
+		curl_easy_cleanup( msg->easy_handle );
 	}
 
 	switch( updater.state ) {
