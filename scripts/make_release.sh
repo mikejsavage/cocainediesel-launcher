@@ -1,7 +1,7 @@
 #! /bin/sh
 
 version=$(basename $(pwd))
-find . -type f | xargs chmod 644
+find . -type f -exec chmod 644 {} \;
 mkdir release
 
 file_platform() {
@@ -18,6 +18,17 @@ find * -type f -print0 | sort -z | while IFS= read -r -d '' f; do
 	size=$(stat -c "%s" "$f")
 	platform=$(file_platform "$f")
 	cp "$f" "release/$digest"
+
+	if echo "$f" | grep -q " "; then
+		echo "filenames can't have spaces - $f"
+		exit 1
+	fi
+
+	if [[ $size = 0 ]]; then
+		echo "$f has size 0"
+		exit 1
+	fi
+
 	echo "$f $digest $size$platform" >> "release/manifest.txt"
 done
 
