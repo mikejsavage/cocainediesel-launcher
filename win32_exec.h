@@ -11,7 +11,12 @@
 #pragma warning( disable : 4311 )
 
 inline void exec_and_quit( const char * path, const char * command_line = NULL ) {
-	int ok = int( ShellExecute( NULL, "runas", path, command_line, NULL, SW_SHOWDEFAULT ) );
+	wchar_t * wide_path = UTF8ToWide( path );
+	wchar_t * wide_command_line = command_line == NULL ? NULL : UTF8ToWide( command_line );
+	defer { free( wide_path ); };
+	defer { free( wide_command_line ); };
+
+	int ok = int( ShellExecuteW( NULL, L"runas", wide_path, wide_command_line, NULL, SW_SHOWDEFAULT ) );
 	if( ok == SE_ERR_ACCESSDENIED )
 		return;
 	if( ok <= 32 )
@@ -28,7 +33,7 @@ inline void run_game( const char * path, const char * discord_id ) {
 }
 
 inline bool open_in_browser( const char * url ) {
-	int ok = int( ShellExecute( NULL, "open", url, NULL, NULL, SW_SHOWDEFAULT ) );
+	int ok = int( ShellExecuteA( NULL, "open", url, NULL, NULL, SW_SHOWDEFAULT ) );
 	return ok > 32;
 }
 

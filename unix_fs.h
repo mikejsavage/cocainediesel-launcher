@@ -4,6 +4,10 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
+inline FILE * open_file( const char * path, const char * mode ) {
+	return fopen( path, mode );
+}
+
 inline bool rename_replace( const char * old_path, const char * new_path ) {
 	return rename( old_path, new_path ) == 0;
 }

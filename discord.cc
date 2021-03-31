@@ -4,6 +4,7 @@
 #include "strlcpy.h"
 #include "patterns.h"
 #include "ggformat.h"
+#include "platform_fs.h"
 #include "platform_exec.h"
 #include "discord.h"
 

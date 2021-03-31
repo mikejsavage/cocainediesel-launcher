@@ -181,7 +181,7 @@ static bool parse_digest( Blake2b256 * h, const array< const char > hex ) {
 }
 
 static const char * file_get_contents_or_empty( const char * path ) {
-	FILE * file = fopen( path, "rb" );
+	FILE * file = open_file( path, "rb" );
 	if( file == NULL )
 		return "";
 
@@ -746,7 +746,7 @@ static UpdaterState updater_update( bool wait ) {
 				if( !make_relative_directories( &update_dirs, download_path.c_str() ) )
 					return updater.state;
 
-				FILE * f = fopen( download_path.c_str(), "wb" );
+				FILE * f = open_file( download_path.c_str(), "wb" );
 				if( f == NULL )
 					return updater.state;
 
@@ -803,7 +803,7 @@ static UpdaterState updater_update( bool wait ) {
 			// write new version.txt/manifest.txt
 			log( "Writing version.txt" );
 
-			FILE * version_txt = fopen( "version.txt", "w" );
+			FILE * version_txt = open_file( "version.txt", "w" );
 			if( version_txt == NULL )
 				break;
 
@@ -814,7 +814,7 @@ static UpdaterState updater_update( bool wait ) {
 
 			log( "Writing manifest.txt" );
 
-			FILE * manifest_txt = fopen( "manifest.txt", "w" );
+			FILE * manifest_txt = open_file( "manifest.txt", "w" );
 			if( manifest_txt == NULL )
 				break;
 

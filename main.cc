@@ -9,6 +9,7 @@
 #include "ggformat.h"
 #include "png.h"
 #include "str.h"
+#include "platform_fs.h"
 #include "platform_exec.h"
 #include "platform_taskbar.h"
 
