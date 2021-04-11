@@ -28,5 +28,4 @@ rm base.zip
 cp ../installer/*.txt .
 rm base/*.md base/.gitignore
 rm base/textures/sprays/gen_materials.sh
-rm -r base/models/mapobjects base/models/objects/jumppad.md3
 rm *.exp *.lib
