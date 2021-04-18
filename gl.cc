@@ -3,9 +3,11 @@
 
 #include "log.h"
 #include "str.h"
+#include "icon.h"
 #include "gl.h"
 
 #include "glad.h"
+#include "libs/stb/stb_image.h"
 
 #define GLFW_INCLUDE_NONE
 #include "libs/glfw/include/GLFW/glfw3.h"
@@ -144,6 +146,12 @@ GLFWwindow * gl_init() {
 	if( !window ) {
 		FATAL( "glfwCreateWindow" );
 	}
+
+	GLFWimage icon;
+	icon.pixels = stbi_load_from_memory( icon_png, icon_png_len, &icon.width, &icon.height, NULL, 4 );
+	ASSERT( icon.pixels != NULL );
+	glfwSetWindowIcon( window, 1, &icon );
+	stbi_image_free( icon.pixels );
 
 	int frame_top, frame_bottom, frame_left, frame_right;
 	glfwGetWindowFrameSize( window, &frame_left, &frame_top, &frame_right, &frame_bottom );
