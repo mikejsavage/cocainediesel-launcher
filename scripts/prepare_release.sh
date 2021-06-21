@@ -27,5 +27,4 @@ rm base.zip
 
 cp ../installer/*.txt .
 rm base/*.md base/.gitignore
-rm base/textures/sprays/gen_materials.sh
 rm *.exp *.lib
