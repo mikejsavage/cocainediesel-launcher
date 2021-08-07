@@ -1,5 +1,7 @@
 #! /bin/sh
 
+set -e
+
 version=$(basename $(pwd))
 find . -type f -exec chmod 644 {} \;
 mkdir release

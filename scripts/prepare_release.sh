@@ -1,5 +1,7 @@
 #! /bin/sh
 
+set -e
+
 wget https://ci.appveyor.com/api/projects/mikejsavage/forksow/artifacts/cocaine_diesel_windows.zip &
 wget https://ci.appveyor.com/api/projects/mikejsavage/forksow-g1fxg/artifacts/cocaine_diesel_linux.zip &
 wget https://ci.appveyor.com/api/projects/mikejsavage/forksow-launcher/artifacts/launcher_windows.zip &
