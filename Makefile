@@ -28,5 +28,5 @@ clean:
 	@$(LUA) make.lua asan > build.ninja || true
 	@$(NINJA) -t clean || true
 	@rm -rf build release
-	@rm -f *.exp *.ilk *.ilp *.pdb game/*.exp game/*.ilk game/*.ilp game/*.pdb
+	@rm -f -- *.exp *.ilk *.ilp *.pdb game/*.exp game/*.ilk game/*.ilp game/*.pdb
 	@rm -f build.ninja
