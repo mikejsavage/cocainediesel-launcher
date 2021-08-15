@@ -9,7 +9,7 @@ mkdir release
 file_platform() {
 	if [ "${1: -4}" = ".exe" ]; then
 		echo " windows64"
-	elif [ "$1" = "client" ] || [ "$1" = "server" ] || [ "$1" = "cocainediesel" ] || [ "$1" = "headlessupdater" ]; then
+	elif [ "$(head -c 4 "$f" | tail -c 3)" = "ELF" ]; then
 		echo " linux64"
 	fi
 }
