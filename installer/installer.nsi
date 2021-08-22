@@ -16,6 +16,9 @@ SetCompressor lzma
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
 
+!define SHCNE_ASSOCCHANGED 0x08000000
+!define SHCNF_IDLIST 0
+
 Section "Install" SectionInstall
 !ifdef ONLY_WRITE_UNINSTALLER
 	WriteUninstaller "$EXEDIR\..\release\uninstall.exe"
@@ -64,6 +67,9 @@ Section "Install" SectionInstall
 	WriteRegStr HKCR ".cddemo" "" "Cocaine Diesel Demo"
 	WriteRegStr HKCR "Cocaine Diesel Demo\DefaultIcon" "" "$INSTDIR\cocainediesel.exe"
 	WriteRegStr HKCR "Cocaine Diesel Demo\Shell\Open\Command" "" "$\"$INSTDIR\client.exe$\" +set fs_basepath $\"$INSTDIR$\" +demo $\"%1$\""
+
+	# Tell Windows to clear its icon cache
+	System::Call "shell32.dll::SHChangeNotify(i, i, i, i) v(${SHCNE_ASSOCCHANGED}, ${SHCNF_IDLIST}, 0, 0)"
 SectionEnd
 
 Function .onInstSuccess
@@ -103,4 +109,7 @@ Section "Uninstall"
 	DeleteRegKey HKCR "diesel"
 	DeleteRegKey HKCR ".cddemo"
 	DeleteRegKey HKCR "Cocaine Diesel Demo"
+
+	# Tell Windows to clear its icon cache
+	System::Call "shell32.dll::SHChangeNotify(i, i, i, i) v(${SHCNE_ASSOCCHANGED}, ${SHCNF_IDLIST}, 0, 0)"
 SectionEnd
