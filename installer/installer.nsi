@@ -6,6 +6,9 @@ Outfile "CocaineDieselInstaller.exe"
 !define MUI_ICON "icon.ico"
 !define MUI_UNICON "icon.ico"
 
+!define SHCNE_ASSOCCHANGED 0x08000000
+!define SHCNF_IDLIST 0
+
 InstallDir "$PROGRAMFILES64\Cocaine Diesel"
 RequestExecutionLevel admin
 
@@ -15,6 +18,18 @@ SetCompressor lzma
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
+
+Function RefreshShellIcons
+  ; By jerome tremblay - april 2003
+  System::Call 'shell32.dll::SHChangeNotify(i, i, i, i) v \
+  (${SHCNE_ASSOCCHANGED}, ${SHCNF_IDLIST}, 0, 0)'
+FunctionEnd
+
+Function un.RefreshShellIcons
+  ; By jerome tremblay - april 2003
+  System::Call 'shell32.dll::SHChangeNotify(i, i, i, i) v \
+  (${SHCNE_ASSOCCHANGED}, ${SHCNF_IDLIST}, 0, 0)'
+FunctionEnd
 
 Section "Install" SectionInstall
 !ifdef ONLY_WRITE_UNINSTALLER
@@ -64,6 +79,9 @@ Section "Install" SectionInstall
 	WriteRegStr HKCR ".cddemo" "" "Cocaine Diesel Demo"
 	WriteRegStr HKCR "Cocaine Diesel Demo\DefaultIcon" "" "$INSTDIR\cocainediesel.exe"
 	WriteRegStr HKCR "Cocaine Diesel Demo\Shell\Open\Command" "" "$\"$INSTDIR\client.exe$\" +set fs_basepath $\"$INSTDIR$\" +demo $\"%1$\""
+
+	# Notify Windows that we updated file associations
+	Call RefreshShellIcons
 SectionEnd
 
 Function .onInstSuccess
@@ -105,4 +123,7 @@ Section "Uninstall"
 	DeleteRegKey HKCR "diesel"
 	DeleteRegKey HKCR ".cddemo"
 	DeleteRegKey HKCR "Cocaine Diesel Demo"
+
+	# Notify Windows that we updated file associations
+	Call un.RefreshShellIcons
 SectionEnd
