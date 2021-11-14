@@ -553,6 +553,7 @@ static UpdaterState updater_update( bool wait ) {
 			dl->state = DownloadState_Done;
 		}
 		else {
+			log( "Download failed. HTTP status = {}, curl error = {}", msg->data.result, http_status );
 			dl->state = DownloadState_Failed;
 		}
 
