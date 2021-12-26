@@ -37,6 +37,7 @@ Section "Install" SectionInstall
 	File LGPL2.txt
 
 	# Start menu shortcut
+	SetShellVarContext all
 	CreateShortCut "$SMPROGRAMS\Cocaine Diesel.lnk" "$INSTDIR\cocainediesel.exe"
 
 	# Uninstaller
@@ -100,6 +101,13 @@ Section "Uninstall"
 	RMDir "$INSTDIR"
 
 	# Start menu shortcut
+	SetShellVarContext all
+	Delete "$SMPROGRAMS\Cocaine Diesel\Cocaine Diesel.lnk"
+	RMDir "$SMPROGRAMS\Cocaine Diesel"
+	Delete "$SMPROGRAMS\Cocaine Diesel.lnk"
+
+	# Installer used to add the start menu shortcut in the wrong place
+	SetShellVarContext current
 	Delete "$SMPROGRAMS\Cocaine Diesel\Cocaine Diesel.lnk"
 	RMDir "$SMPROGRAMS\Cocaine Diesel"
 	Delete "$SMPROGRAMS\Cocaine Diesel.lnk"
