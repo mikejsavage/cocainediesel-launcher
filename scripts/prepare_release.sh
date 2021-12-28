@@ -30,3 +30,4 @@ rm base.zip
 cp ../installer/*.txt .
 rm base/*.md base/.gitignore
 rm -- *.exp *.lib
+rm -- *.debug
