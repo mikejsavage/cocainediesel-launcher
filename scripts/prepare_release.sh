@@ -2,8 +2,8 @@
 
 set -e
 
-wget https://ci.appveyor.com/api/projects/mikejsavage/cocainediesel-windows-tagged/artifacts/cocaine_diesel_windows.zip &
-wget https://ci.appveyor.com/api/projects/mikejsavage/cocainediesel-linux-tagged/artifacts/cocaine_diesel_linux.zip &
+wget https://ci.appveyor.com/api/projects/mikejsavage/cocainediesel-windows/artifacts/cocaine_diesel_windows.zip &
+wget https://ci.appveyor.com/api/projects/mikejsavage/cocainediesel-linux/artifacts/cocaine_diesel_linux.zip &
 wget https://ci.appveyor.com/api/projects/mikejsavage/cocainediesel-launcher-windows/artifacts/launcher_windows.zip &
 wget https://ci.appveyor.com/api/projects/mikejsavage/cocainediesel-launcher-linux/artifacts/launcher_linux.zip &
 
