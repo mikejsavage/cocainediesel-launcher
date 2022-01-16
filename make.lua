@@ -1,5 +1,6 @@
 require( "scripts.gen_ninja" )
 
+require( "libs/blake2b-avx" )
 require( "libs/imgui" )
 require( "libs/glfw" )
 require( "libs/monocypher" )
@@ -50,11 +51,11 @@ bin( "genkeys", {
 
 bin( "b2sum", {
 	srcs = { "b2sum.cc", "ggformat.cc" },
-	libs = { "monocypher" },
+	libs = { "blake2b-avx" },
 	gcc_extra_ldflags = "-static",
 } )
-gcc_obj_cxxflags( "b2sum.cc", "-O2" )
-msvc_obj_cxxflags( "b2sum.cc", "/O2" )
+msvc_obj_cxxflags( "b2sum%.cc", "/O2" )
+gcc_obj_cxxflags( "b2sum%.cc", "-O3" )
 
 if io.open( "secret_key.h" ) then
 	bin( "sign", {
