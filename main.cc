@@ -3,7 +3,6 @@
 
 #include "intrinsics.h"
 #include "updater.h"
-#include "discord.h"
 #include "log.h"
 #include "gl.h"
 #include "ggformat.h"
@@ -43,29 +42,6 @@ static void log_cb( const char * msg ) {
 	log_lines.push_back( std::string( msg ) );
 }
 
-static const char * discord_step() {
-	DiscordState state = discord_update();
-
-	if( state == DiscordState_Unauthenticated ) {
-		bool login = ImGui::Button( "Link with Discord" );
-		if( login ) {
-			discord_login();
-		}
-	}
-	else if( state == DiscordState_Authenticating ) {
-		ImGui::AlignTextToFramePadding();
-		ImGui::Text( "Linking... check your browser" );
-	}
-	else if( state == DiscordState_Authenticated ) {
-		DiscordUser user = discord_user();
-		ImGui::AlignTextToFramePadding();
-		ImGui::Text( "Hi %s#%s. Run the game and then you won't need to do this again", user.username, user.discriminator );
-		return user.id;
-	}
-
-	return NULL;
-}
-
 template< typename... Rest >
 static void right_text( const char * fmt, const Rest & ... rest ) {
 	str< 256 > s( fmt, rest... );
@@ -76,7 +52,6 @@ static void right_text( const char * fmt, const Rest & ... rest ) {
 
 static void launcher_main( bool autostart ) {
 	updater_init( autostart, log_cb );
-	discord_init();
 	GLFWwindow * window = gl_init();
 	taskbar_init();
 
@@ -122,7 +97,7 @@ static void launcher_main( bool autostart ) {
 	UpdaterState updater_state = UpdaterState_Init;
 
 	while( !glfwWindowShouldClose( window ) ) {
-		if( ( updater_state == UpdaterState_NeedsUpdate || updater_state == UpdaterState_ReadyToPlay ) && discord_state() != DiscordState_Authenticating )
+		if( ( updater_state == UpdaterState_NeedsUpdate || updater_state == UpdaterState_ReadyToPlay ) )
 			glfwWaitEvents();
 		else
 			glfwPollEvents();
@@ -147,8 +122,6 @@ static void launcher_main( bool autostart ) {
 		ImGui::Begin( "controls", NULL, ImGuiWindowFlags_NoDecoration );
 
 		updater_state = updater_update();
-		// const char * discord_user_id = discord_step();
-		const char * discord_user_id = NULL;
 
 		ImGui::SameLine();
 
@@ -186,7 +159,7 @@ static void launcher_main( bool autostart ) {
 			bool launch = ImGui::Button( "Play", ImVec2( -1, 50 ) );
 
 			if( launch || enter_key_pressed ) {
-				run_game( GAME_BINARY, discord_user_id );
+				run_game( GAME_BINARY );
 			}
 		}
 		else if( updater_state == UpdaterState_NeedsUpdate ) {
@@ -248,7 +221,6 @@ static void launcher_main( bool autostart ) {
 
 	taskbar_term();
 	gl_term();
-	discord_term();
 	updater_term();
 }
 

@@ -4,11 +4,8 @@
 
 #include "log.h"
 
-inline void run_game( const char * path, const char * discord_id ) {
-	if( discord_id == NULL )
-		execl( path, path, ( char * ) 0 );
-	else
-		execl( path, path, "+setau", "cl_discord", discord_id, ( char * ) 0 );
+inline void run_game( const char * path ) {
+	execl( path, path, ( char * ) 0 );
 	FATAL( "execl" );
 }
 

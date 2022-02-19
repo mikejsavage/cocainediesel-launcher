@@ -25,11 +25,8 @@ inline void exec_and_quit( const char * path, const char * command_line = NULL )
 	exit( 0 );
 }
 
-inline void run_game( const char * path, const char * discord_id ) {
-	if( discord_id == NULL )
-		exec_and_quit( path );
-	str< 256 > arg( "+setau cl_discord {}", discord_id );
-	exec_and_quit( path, arg.c_str() );
+inline void run_game( const char * path ) {
+	exec_and_quit( path );
 }
 
 inline bool open_in_browser( const char * url ) {
