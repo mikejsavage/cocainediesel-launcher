@@ -7,7 +7,7 @@ find . -type f -exec chmod 644 {} \;
 mkdir release
 
 file_platform() {
-	if [ "${1: -4}" = ".exe" ]; then
+	if [ "${1: -4}" = ".exe" ] || [ "${1: -4}" = ".dll" ]; then
 		echo " windows64"
 	elif [ "$(head -c 4 "$f" | tail -c 3)" = "ELF" ]; then
 		echo " linux64"
