@@ -62,12 +62,12 @@ Section "Install" SectionInstall
 	WriteRegStr HKCR "diesel" "" "URL:diesel protocl"
 	WriteRegStr HKCR "diesel" "URL Protocol" ""
 	WriteRegStr HKCR "diesel\DefaultIcon" "" "$INSTDIR\cocainediesel.exe"
-	WriteRegStr HKCR "diesel\Shell\Open\Command" "" "$\"$INSTDIR\client.exe$\" +set fs_basepath $\"$INSTDIR$\" +connect $\"%1$\""
+	WriteRegStr HKCR "diesel\Shell\Open\Command" "" "$\"$INSTDIR\client.exe$\" +connect $\"%1$\""
 
 	# Demo registry keys
 	WriteRegStr HKCR ".cddemo" "" "Cocaine Diesel Demo"
 	WriteRegStr HKCR "Cocaine Diesel Demo\DefaultIcon" "" "$INSTDIR\cocainediesel.exe"
-	WriteRegStr HKCR "Cocaine Diesel Demo\Shell\Open\Command" "" "$\"$INSTDIR\client.exe$\" +set fs_basepath $\"$INSTDIR$\" +demo $\"%1$\""
+	WriteRegStr HKCR "Cocaine Diesel Demo\Shell\Open\Command" "" "$\"$INSTDIR\client.exe$\" +demo $\"%1$\""
 
 	# Tell Windows to clear its icon cache
 	System::Call "shell32.dll::SHChangeNotify(i, i, i, i) v(${SHCNE_ASSOCCHANGED}, ${SHCNF_IDLIST}, 0, 0)"
