@@ -1,6 +1,5 @@
 require( "scripts.gen_ninja" )
 
-require( "libs.blake2b-avx" )
 require( "libs.imgui" )
 require( "libs.glfw" )
 require( "libs.monocypher" )
@@ -50,7 +49,7 @@ bin( "genkeys", {
 
 bin( "b2sum", {
 	srcs = { "b2sum.cc", "ggformat.cc" },
-	libs = { "blake2b-avx" },
+	libs = { "monocypher" },
 	gcc_extra_ldflags = "-static",
 } )
 msvc_obj_cxxflags( "b2sum%.cc", "/O2" )
