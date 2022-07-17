@@ -7,8 +7,13 @@ static void log_cb( const char * msg ) {
 	printf( "%s\n", msg );
 }
 
-int main() {
-	updater_init( true, log_cb );
+int main( int argc, char ** argv ) {
+	if( argc > 2 ) {
+		printf( "Usage: %s [optional target version, e.g. v1.2.3.4]\n", argv[ 0 ] );
+		return 1;
+	}
+
+	updater_init( true, log_cb, argc == 2 ? argv[ 1 ] : NULL );
 	updater_wait();
 
 	ggprint( "Local version {}\n", updater_local_version() );

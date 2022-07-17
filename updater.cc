@@ -69,6 +69,7 @@ struct SmoothValue {
 static CURLM * curl_multi;
 static LogCallback log_callback;
 static bool autostart_update;
+static const char * target_version;
 
 
 struct Updater {
@@ -495,9 +496,14 @@ static int retry_delay( double now ) {
 	return recent_failures == ARRAY_COUNT( last_failures ) ? 10 : 0;
 }
 
-void updater_init( bool autostart, LogCallback log_cb ) {
-	autostart_update = autostart;
+void updater_init( bool autostart, LogCallback log_cb, const char * version ) {
 	log_callback = log_cb;
+	autostart_update = autostart;
+	target_version = version;
+
+	if( target_version != NULL && strlen( target_version ) > 0 && target_version[ 0 ] == 'v' ) {
+		target_version++;
+	}
 
 	std::string game_folder = get_executable_directory();
 	if( !change_directory( game_folder.c_str() ) )
@@ -608,7 +614,22 @@ static UpdaterState updater_update( bool wait ) {
 			break;
 
 		case UpdaterState_DownloadingVersion_Retry:
-			if( retry ) {
+			if( target_version != NULL ) {
+				bool ok = parse_version( &updater.remote_version, target_version );
+				if( ok ) {
+					if( updater.remote_version == updater.local_version ) {
+						updater.state = UpdaterState_ReadyToPlay;
+					}
+					else {
+						updater.state = UpdaterState_DownloadingManifest_Retry;
+						updater.retry_at = now;
+					}
+				}
+				else {
+					FATAL( "Couldn't parse target version" );
+				}
+			}
+			else if( retry ) {
 				download( HOST "/version.txt" );
 				updater.state = UpdaterState_DownloadingVersion;
 			}

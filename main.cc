@@ -51,7 +51,7 @@ static void right_text( const char * fmt, const Rest & ... rest ) {
 }
 
 static void launcher_main( bool autostart ) {
-	updater_init( autostart, log_cb );
+	updater_init( autostart, log_cb, NULL );
 	GLFWwindow * window = gl_init();
 	taskbar_init();
 

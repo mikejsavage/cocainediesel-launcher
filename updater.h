@@ -40,7 +40,7 @@ inline void format( FormatBuffer * fb, const Version & v, const FormatOpts & opt
 
 typedef void ( * LogCallback )( const char * msg );
 
-void updater_init( bool autostart, LogCallback log_cb );
+void updater_init( bool autostart, LogCallback log_cb, const char * version );
 void updater_term();
 
 void updater_start_update();
