@@ -375,17 +375,14 @@ static void download( const char * url, Download * reuse = NULL ) {
 	try_set_opt( curl, CURLOPT_WRITEDATA, reuse );
 	try_set_opt( curl, CURLOPT_PRIVATE, reuse );
 
-// #if PLATFORM_LINUX
+#if PLATFORM_LINUX
 	/*
 	 * some ISP was doing broken caching and serving the wrong files over
 	 * HTTP so we use HTTPS. we have our own integrity checks and setting
 	 * up certs on Linux is really annoying so just don't bother
-	 *
-	 * 2022 update: we have seen TLS break in the wild on Windows too so do
-	 * this everywhere I guess
 	 */
 	try_set_opt( curl, CURLOPT_SSL_VERIFYPEER, 0l );
-// #endif
+#endif
 
 	curl_multi_add_handle( curl_multi, curl );
 }
