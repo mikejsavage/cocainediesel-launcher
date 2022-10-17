@@ -56,6 +56,7 @@ struct Download {
 	std::string url;
 	std::string body;
 	double retry_at;
+	char curl_error[ CURL_ERROR_SIZE ];
 };
 
 struct SmoothValue {
@@ -374,6 +375,7 @@ static void download( const char * url, Download * reuse = NULL ) {
 
 	try_set_opt( curl, CURLOPT_WRITEDATA, reuse );
 	try_set_opt( curl, CURLOPT_PRIVATE, reuse );
+	try_set_opt( curl, CURLOPT_ERRORBUFFER, reuse->curl_error );
 
 #if PLATFORM_LINUX
 	/*
@@ -557,7 +559,7 @@ static UpdaterState updater_update( bool wait ) {
 			dl->state = DownloadState_Done;
 		}
 		else {
-			log( "Download failed. HTTP status = {}, curl error = {}", http_status, curl_easy_strerror( msg->data.result ) );
+			log( "Download failed. HTTP status = {}, curl error = {} ({})", http_status, dl->curl_error, curl_easy_strerror( msg->data.result ) );
 			dl->state = DownloadState_Failed;
 		}
 
