@@ -10,13 +10,18 @@
 #pragma warning( disable : 4302 )
 #pragma warning( disable : 4311 )
 
-inline void exec_and_quit( const char * path, const char * command_line = NULL ) {
+enum RunAsAdmin {
+	RunAsAdmin_No,
+	RunAsAdmin_Yes,
+};
+
+inline void exec_and_quit( const char * path, RunAsAdmin run_as_admin, const char * command_line = NULL ) {
 	wchar_t * wide_path = UTF8ToWide( path );
 	wchar_t * wide_command_line = command_line == NULL ? NULL : UTF8ToWide( command_line );
 	defer { free( wide_path ); };
 	defer { free( wide_command_line ); };
 
-	int ok = int( ShellExecuteW( NULL, L"runas", wide_path, wide_command_line, NULL, SW_SHOWDEFAULT ) );
+	int ok = int( ShellExecuteW( NULL, run_as_admin == RunAsAdmin_Yes ? L"runas" : NULL, wide_path, wide_command_line, NULL, SW_SHOWDEFAULT ) );
 	if( ok == SE_ERR_ACCESSDENIED )
 		return;
 	if( ok <= 32 )
@@ -26,7 +31,7 @@ inline void exec_and_quit( const char * path, const char * command_line = NULL )
 }
 
 inline void run_game( const char * path ) {
-	exec_and_quit( path );
+	exec_and_quit( path, RunAsAdmin_No );
 }
 
 inline bool open_in_browser( const char * url ) {

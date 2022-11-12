@@ -168,7 +168,7 @@ static void launcher_main( bool autostart ) {
 
 			if( update || enter_key_pressed ) {
 #if PLATFORM_WINDOWS
-				exec_and_quit( "elevate_for_update.exe" );
+				exec_and_quit( "elevate_for_update.exe", RunAsAdmin_Yes );
 #else
 				updater_start_update();
 #endif
