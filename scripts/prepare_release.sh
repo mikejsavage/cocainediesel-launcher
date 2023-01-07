@@ -28,6 +28,6 @@ rm launcher_linux.zip
 rm base.zip
 
 cp ../installer/*.txt .
-rm base/*.md base/.gitignore
+rm base/.gitignore
 rm -- *.exp *.lib
 rm -- *.debug
