@@ -203,7 +203,7 @@ private:
 inline void format( FormatBuffer * fb, array< const char > arr, const FormatOpts & opts ) {
 	if( fb->len < fb->capacity ) {
 		size_t len = min( arr.n + 1, fb->capacity - fb->len );
-		strlcpy( fb->buf + fb->len, arr.ptr(), len );
+		SafeStrCpy( fb->buf + fb->len, arr.ptr(), len );
 	}
 	fb->len += arr.n;
 }

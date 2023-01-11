@@ -2,4 +2,4 @@
 
 #include <stddef.h>
 
-size_t strlcpy( char * dst, const char * src, size_t dsize );
+void SafeStrCpy( char * dst, const char * src, size_t dst_size );
