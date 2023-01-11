@@ -4,7 +4,7 @@
 #include <shobjidl.h>
 
 #define GLFW_EXPOSE_NATIVE_WIN32
-#include "libs/glfw/include/GLFW/glfw3native.h"
+#include "libs/glfw3/GLFW/glfw3native.h"
 
 static ITaskbarList3 * taskbar;
 
