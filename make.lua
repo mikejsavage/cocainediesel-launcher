@@ -1,7 +1,6 @@
 require( "scripts.gen_ninja" )
 
 require( "libs.imgui" )
-require( "libs.glfw" )
 require( "libs.monocypher" )
 require( "libs.stb" )
 require( "libs.whereami" )
@@ -12,13 +11,12 @@ bin( "cocainediesel", {
 		"patterns.cc", "platform_taskbar.cc", "gl.cc", "glad.cc", "png.cc"
 	},
 
-	libs = { "glfw", "imgui", "monocypher", "stb_image", "whereami" },
-	prebuilt_libs = { "curl", OS == "linux" and "mbedtls" or nil },
+	libs = { "imgui", "monocypher", "stb_image", "whereami" },
+	prebuilt_libs = { "curl", "glfw3", OS == "linux" and "mbedtls" or nil },
 
 	rc = "cocainediesel_manifest",
 
 	msvc_extra_ldflags = "opengl32.lib gdi32.lib ole32.lib Ws2_32.lib crypt32.lib",
-	gcc_extra_ldflags = "-lX11",
 } )
 
 bin( "headlessupdater", {

@@ -10,7 +10,7 @@
 #include "libs/stb/stb_image.h"
 
 #define GLFW_INCLUDE_NONE
-#include "libs/glfw/include/GLFW/glfw3.h"
+#include "libs/glfw3/GLFW/glfw3.h"
 
 #define RESET "\x1b[0m"
 #define RED "\x1b[1;31m"

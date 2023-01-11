@@ -16,7 +16,7 @@
 #include "libs/curl/curl.h"
 
 #define GLFW_INCLUDE_NONE
-#include "libs/glfw/include/GLFW/glfw3.h"
+#include "libs/glfw3/GLFW/glfw3.h"
 
 #include "libs/imgui/imgui.h"
 #include "libs/imgui/imgui_impl_glfw.h"

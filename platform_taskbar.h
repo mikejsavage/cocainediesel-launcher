@@ -3,7 +3,7 @@
 #include "intrinsics.h"
 
 #define GLFW_INCLUDE_NONE
-#include "libs/glfw/include/GLFW/glfw3.h"
+#include "libs/glfw3/GLFW/glfw3.h"
 
 void taskbar_init();
 void taskbar_term();
