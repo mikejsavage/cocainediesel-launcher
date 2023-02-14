@@ -1,11 +1,10 @@
 version: "{build}"
 clone_depth: 1
-image: Ubuntu
+image: Ubuntu2004
 
 build_script:
 - sh: sudo apt-get -y update
 - sh: sudo apt-get -y install libxcursor-dev libxi-dev libxrandr-dev libxinerama-dev libegl1-mesa-dev libxkbcommon-dev libgl-dev
-- sh: sudo update-alternatives --set gcc /usr/bin/gcc-9
 - sh: scripts/lua.linux make.lua release > build.ninja
 - sh: scripts/ninja.linux -v -k 0
 
