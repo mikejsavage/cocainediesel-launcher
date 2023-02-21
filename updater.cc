@@ -527,7 +527,7 @@ static UpdaterState updater_update( bool wait ) {
 	while( true ) {
 		int dont_care;
 		if( wait ) {
-			CURLMcode ok = curl_multi_wait( curl_multi, NULL, 0, -1, NULL );
+			CURLMcode ok = curl_multi_wait( curl_multi, NULL, 0, 0, NULL );
 			if( ok != CURLM_OK )
 				FATAL( "curl_multi_wait: {}", curl_multi_strerror( ok ) );
 		}
