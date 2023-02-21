@@ -3,13 +3,13 @@
 #if defined( _WIN32 )
 #  define PLATFORM_WINDOWS 1
 #  define PLATFORM_NAME "windows64"
+#elif defined( __APPLE__ )
+#  define PLATFORM_MACOS 1
+#  define PLATFORM_NAME "macos64"
+#  define PLATFORM_UNIX 1
 #elif defined( __linux__ )
 #  define PLATFORM_LINUX 1
 #  define PLATFORM_NAME "linux64"
-#  define PLATFORM_UNIX 1
-#elif defined( __APPLE__ )
-#  define PLATFORM_OSX 1
-#  define PLATFORM_NAME "macos64"
 #  define PLATFORM_UNIX 1
 #else
 #  error new platform

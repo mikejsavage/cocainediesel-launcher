@@ -4,7 +4,7 @@
 
 #if PLATFORM_WINDOWS
 #include "win32_time.h"
-#elif PLATFORM_OSX
+#elif PLATFORM_MACOS
 #include "darwin_time.h"
 #elif PLATFORM_UNIX
 #include "unix_time.h"
