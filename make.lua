@@ -5,6 +5,14 @@ require( "libs.monocypher" )
 require( "libs.stb" )
 require( "libs.whereami" )
 
+local platform_curl_libs = { }
+if OS ~= "macos" then
+	table.insert( platform_curl_libs, "curl" )
+end
+if OS == "linux" then
+	table.insert( platform_curl_libs, "mbedtls" )
+end
+
 bin( "cocainediesel", {
 	srcs = {
 		"main.cc", "updater.cc", "icon.cc", "ggformat.cc", "strlcpy.cc", "strtonum.cc",
@@ -12,11 +20,12 @@ bin( "cocainediesel", {
 	},
 
 	libs = { "imgui", "monocypher", "stb_image", "whereami" },
-	prebuilt_libs = { "curl", "glfw3", OS == "linux" and "mbedtls" or nil },
+	prebuilt_libs = { "glfw3", platform_curl_libs },
 
 	rc = "cocainediesel_manifest",
 
 	windows_ldflags = "opengl32.lib gdi32.lib ole32.lib Ws2_32.lib crypt32.lib",
+	macos_ldflags = "-lcurl -framework Cocoa -framework CoreVideo -framework IOKit",
 	linux_ldflags = "-lm -lpthread -ldl",
 } )
 
@@ -24,9 +33,10 @@ bin( "headlessupdater", {
 	srcs = { "headless.cc", "updater.cc", "ggformat.cc", "strlcpy.cc", "strtonum.cc", "patterns.cc" },
 
 	libs = { "monocypher", "whereami" },
-	prebuilt_libs = { "curl", OS == "linux" and "mbedtls" or nil },
+	prebuilt_libs = { platform_curl_libs },
 
 	windows_ldflags = "Ws2_32.lib crypt32.lib",
+	macos_ldflags = "-lcurl",
 	linux_ldflags = "-lm -lpthread",
 } )
 

@@ -1,7 +1,12 @@
-local function copy( t )
+local function copy( t, extra )
 	local res = { }
 	for k, v in pairs( t ) do
 		res[ k ] = v
+	end
+	if extra then
+		for k, v in pairs( extra ) do
+			res[ k ] = v
+		end
 	end
 	return res
 end
@@ -55,6 +60,18 @@ configs[ "linux-release" ] = {
 	cxxflags = "-O2 -DRELEASE_BUILD",
 	ldflags = "-s",
 }
+
+configs[ "macos" ] = copy( configs[ "linux" ], {
+	cxx = "clang++",
+	ldflags = "",
+	cxxflags = configs[ "linux" ].cxxflags .. " -mmacosx-version-min=10.13",
+} )
+configs[ "macos-debug" ] = {
+	cxxflags = "-O0 -g -fno-omit-frame-pointer",
+}
+configs[ "macos-release" ] = copy( configs[ "linux-release" ], {
+	ldflags = "-Wl,-dead_strip -Wl,-x",
+} )
 
 OS = os.name:lower()
 config = arg[ 1 ] or "debug"
