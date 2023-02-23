@@ -1,6 +1,9 @@
 require( "scripts.gen_ninja" )
 
+require( "libs.curl" )
 require( "libs.imgui" )
+require( "libs.glfw3" )
+require( "libs.mbedtls" )
 require( "libs.monocypher" )
 require( "libs.stb" )
 require( "libs.whereami" )
@@ -19,8 +22,7 @@ bin( "cocainediesel", {
 		"patterns.cc", "platform_taskbar.cc", "gl.cc", "glad.cc", "png.cc"
 	},
 
-	libs = { "imgui", "monocypher", "stb_image", "whereami" },
-	prebuilt_libs = { "glfw3", platform_curl_libs },
+	libs = { "glfw3", "imgui", "monocypher", "stb_image", "whereami", platform_curl_libs },
 
 	rc = "cocainediesel_manifest",
 
@@ -31,14 +33,14 @@ bin( "cocainediesel", {
 
 bin( "headlessupdater", {
 	srcs = { "headless.cc", "updater.cc", "ggformat.cc", "strlcpy.cc", "patterns.cc" },
-
-	libs = { "monocypher", "whereami" },
-	prebuilt_libs = { platform_curl_libs },
+	libs = { "monocypher", "whereami", platform_curl_libs },
 
 	windows_ldflags = "Ws2_32.lib crypt32.lib",
 	macos_ldflags = "-lcurl",
 	linux_ldflags = "-lm -lpthread",
 } )
+
+msvc_obj_cxxflags( "updater%.cc", "/Ilibs/mbedtls" )
 
 if OS == "windows" then
 	bin( "elevate_for_update", {
@@ -72,3 +74,5 @@ if io.open( "secret_key.h" ) then
 		linux_ldflags = "-static",
 	} )
 end
+
+write_ninja_script()

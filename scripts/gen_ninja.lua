@@ -26,12 +26,12 @@ configs[ "windows" ] = {
 }
 
 configs[ "windows-debug" ] = {
-	cxxflags = "/Od /MTd /Z7 /Zo",
-	ldflags = "/Od /MTd /Z7 /Zo",
+	cxxflags = "/MTd /Z7 /Zo",
+	ldflags = "/NOLOGO /DEBUG /DEBUG:FASTLINK /FUNCTIONPADMIN /OPT:NOREF /OPT:NOICF",
 }
 configs[ "windows-release" ] = {
 	cxxflags = "/O2 /MT /DRELEASE_BUILD",
-	bin_prefix = "release/",
+	output_dir = "release/",
 }
 
 configs[ "linux" ] = {
@@ -56,7 +56,7 @@ configs[ "linux-asan" ] = {
 	ldflags = "-fsanitize=address",
 }
 configs[ "linux-release" ] = {
-	bin_prefix = "release/",
+	output_dir = "release/",
 	cxxflags = "-O2 -DRELEASE_BUILD",
 	ldflags = "-s",
 }
@@ -97,11 +97,13 @@ local function rightmost( key )
 		or ""
 end
 
-local bin_prefix = rightmost( "bin_prefix" )
+local output_dir = rightmost( "output_dir" )
 local bin_suffix = rightmost( "bin_suffix" )
 local obj_suffix = rightmost( "obj_suffix" )
 local lib_prefix = rightmost( "lib_prefix" )
 local lib_suffix = rightmost( "lib_suffix" )
+local prebuilt_lib_dir = rightmost( "prebuilt_lib_dir" )
+prebuilt_lib_dir = prebuilt_lib_dir == "" and OS_config or prebuilt_lib_dir
 local cxxflags = concat( "cxxflags" ) .. " " .. concat( "warnings" )
 local ldflags = concat( "ldflags" )
 
@@ -109,6 +111,11 @@ toolchain = rightmost( "toolchain" )
 
 local dir = "build/" .. OS_config
 local output = { }
+
+local objs = { }
+local bins = { }
+local libs = { }
+local prebuilt_libs = { }
 
 local function flatten_into( res, t )
 	for _, x in ipairs( t ) do
@@ -121,47 +128,50 @@ local function flatten_into( res, t )
 end
 
 local function flatten( t )
+	if not t then
+		return { }
+	end
+
 	local res = { }
 	flatten_into( res, t )
 	return res
 end
 
-local function join( names, suffix, prefix )
+local function join_srcs( names )
 	if not names then
 		return ""
 	end
 
-	prefix = prefix or ""
 	local flat = flatten( names )
 	for i = 1, #flat do
-		flat[ i ] = dir .. "/" .. prefix .. flat[ i ] .. suffix
+		flat[ i ] = dir .. "/" .. flat[ i ] .. obj_suffix
 	end
 	return table.concat( flat, " " )
 end
 
-local function joinpb( names, suffix, prefix )
-	if not names then
-		return ""
+local function join_libs( names )
+	local joined = { }
+	for _, lib in ipairs( flatten( names ) ) do
+		local prebuilt_lib = prebuilt_libs[ lib ]
+
+		if prebuilt_lib then
+			for _, archive in ipairs( prebuilt_lib ) do
+				table.insert( joined, "libs/" .. lib .. "/" .. prebuilt_lib_dir .. "/" .. lib_prefix .. archive .. lib_suffix )
+			end
+		else
+			table.insert( joined, dir .. "/" .. lib_prefix .. lib .. lib_suffix )
+		end
 	end
 
-	prefix = prefix or ""
-	local flat = flatten( names )
-	for i = 1, #flat do
-		flat[ i ] = "libs/" .. flat[ i ] .. "/" .. OS_config .. "/" .. prefix .. flat[ i ] .. suffix
-	end
-	return table.concat( flat, " " )
+	return table.concat( joined, " " )
 end
 
 local function printf( form, ... )
-	print( form:format( ... ) )
+	print( form and form:format( ... ) or "" )
 end
 
-local objs = { }
-local bins = { }
-local libs = { }
-
 local function add_srcs( srcs )
-	for _, src in ipairs( flatten( srcs ) ) do
+	for _, src in ipairs( srcs ) do
 		if not objs[ src ] then
 			objs[ src ] = { }
 		end
@@ -183,23 +193,13 @@ function lib( lib_name, srcs )
 	assert( type( srcs ) == "table", "srcs should be a table" )
 	assert( not libs[ lib_name ] )
 
-	libs[ lib_name ] = {
-		srcs = srcs,
-	}
-
+	libs[ lib_name ] = srcs
 	add_srcs( srcs )
 end
 
-function rc( rc_name )
-	if OS == "windows" then
-		printf( "%s/%s%s: %s.rc %s.xml", dir, rc_name, obj_suffix, rc_name, rc_name )
-		printf( "\t@printf \"\\033[1;33mbuilding $@\\033[0m\\n\"" )
-		printf( "\t@mkdir -p \"$(@D)\"" )
-		printf( "\t@rc /fo$@ /nologo $<" )
-	else
-		local cxx = rightmost( "cxx" )
-		printf( "build %s/%s%s: rc", dir, rc_name, obj_suffix )
-	end
+function prebuilt_lib( lib_name, archives )
+	assert( not prebuilt_libs[ lib_name ] )
+	prebuilt_libs[ lib_name ] = archives or { lib_name }
 end
 
 function obj_cxxflags( src_name, cxxflags )
@@ -232,11 +232,29 @@ msvc_obj_replace_cxxflags = toolchain_helper( "msvc", obj_replace_cxxflags )
 gcc_obj_cxxflags = toolchain_helper( "gcc", obj_cxxflags )
 gcc_obj_replace_cxxflags = toolchain_helper( "gcc", obj_replace_cxxflags )
 
-printf( "builddir = build" )
-printf( "cxxflags = %s", cxxflags )
-printf( "ldflags = %s", ldflags )
+local function sort_by_key( t )
+	local ret = { }
+	for k, v in pairs( t ) do
+		table.insert( ret, { key = k, value = v } )
+	end
+	table.sort( ret, function( a, b ) return a.key < b.key end )
 
-if toolchain == "msvc" then
+	function iter()
+		for _, x in ipairs( ret ) do
+			coroutine.yield( x.key, x.value )
+		end
+	end
+
+	return coroutine.wrap( iter )
+end
+
+function write_ninja_script()
+	printf( "builddir = build" )
+	printf( "cxxflags = %s", cxxflags )
+	printf( "ldflags = %s", ldflags )
+	printf()
+
+	if toolchain == "msvc" then
 
 printf( [[
 rule cpp
@@ -245,11 +263,11 @@ rule cpp
     deps = msvc
 
 rule bin
-    command = cl -Fe$out $in $ldflags $extra_ldflags
+    command = link /OUT:$out $in $ldflags $extra_ldflags
     description = $out
 
 rule lib
-    command = lib -OUT:$out $in
+    command = lib /NOLOGO /OUT:$out $in
     description = $out
 
 rule rc
@@ -257,76 +275,65 @@ rule rc
     description = $in
 ]] )
 
-elseif toolchain == "gcc" then
-
-local cxx = rightmost( "cxx" )
+	elseif toolchain == "gcc" then
 
 printf( [[
-cc = %s
-cpp = %s
-
 rule cpp
-    command = $cpp -MD -MF $out.d $cxxflags $extra_cxxflags -c -o $out $in
+    command = g++ -MD -MF $out.d $cxxflags $extra_cxxflags -c -o $out $in
     depfile = $out.d
     description = $in
     deps = gcc
 
 rule bin
-    command = $cpp -o $out $in $ldflags $extra_ldflags
+    command = g++ -o $out $in $ldflags $extra_ldflags
     description = $out
 
 rule lib
     command = ar rs $out $in
     description = $out
-]], "gcc", cxx )
+]] )
 
-end
+	end
 
-local function rule_for_src( src_name )
-	local ext = src_name:match( "([^%.]+)$" )
-	return ( { cc = "cpp", m = "m" } )[ ext ]
-end
-
-automatically_print_output_at_exit = setmetatable( { }, {
-	__gc = function()
-		for src_name, cfg in pairs( objs ) do
-			local rule = rule_for_src( src_name )
-			printf( "build %s/%s%s: %s %s", dir, src_name, obj_suffix, rule, src_name )
-			if cfg.cxxflags then
-				printf( "    cxxflags = %s", cfg.cxxflags )
-			end
-			if cfg.extra_cxxflags then
-				printf( "    extra_cxxflags = %s", cfg.extra_cxxflags )
-			end
+	for src_name, cfg in sort_by_key( objs ) do
+		printf( "build %s/%s%s: cpp %s", dir, src_name, obj_suffix, src_name )
+		if cfg.cxxflags then
+			printf( "    cxxflags = %s", cfg.cxxflags )
 		end
-
-		for lib_name, cfg in pairs( libs ) do
-			printf( "build %s/%s%s%s: lib %s", dir, lib_prefix, lib_name, lib_suffix, join( cfg.srcs, obj_suffix ) )
-		end
-
-		for bin_name, cfg in pairs( bins ) do
-			local srcs = { cfg.srcs }
-
-			if OS == "windows" and cfg.rc then
-				srcs = { cfg.srcs, cfg.rc }
-				printf( "build %s/%s%s: rc %s.rc %s.xml", dir, cfg.rc, obj_suffix, cfg.rc, cfg.rc )
-				printf( "    in_rc = %s.rc", cfg.rc )
-			end
-
-			local bin_path = ( "%s%s%s" ):format( bin_prefix, bin_name, bin_suffix )
-			printf( "build %s: bin %s %s %s",
-				bin_path,
-				join( srcs, obj_suffix ),
-				join( cfg.libs, lib_suffix, lib_prefix ),
-				joinpb( cfg.prebuilt_libs, lib_suffix, lib_prefix )
-			)
-
-			local ldflags_key = OS .. "_ldflags"
-			if cfg[ ldflags_key ] then
-				printf( "    extra_ldflags = %s", cfg[ ldflags_key ] )
-			end
-
-			printf( "default %s", bin_path )
+		if cfg.extra_cxxflags then
+			printf( "    extra_cxxflags = %s", cfg.extra_cxxflags )
 		end
 	end
-} )
+
+	printf()
+
+	for lib_name, srcs in sort_by_key( libs ) do
+		printf( "build %s/%s%s%s: lib %s", dir, lib_prefix, lib_name, lib_suffix, join_srcs( srcs ) )
+	end
+
+	printf()
+
+	for bin_name, cfg in sort_by_key( bins ) do
+		local srcs = { cfg.srcs }
+
+		if OS == "windows" and cfg.rc then
+			srcs = { cfg.srcs, cfg.rc }
+			printf( "build %s/%s%s: rc %s.rc", dir, cfg.rc, obj_suffix, cfg.rc )
+			printf( "    in_rc = %s.rc", cfg.rc )
+		end
+
+		local full_name = output_dir .. bin_name .. bin_suffix
+		printf( "build %s: bin %s %s",
+			full_name,
+			join_srcs( srcs ),
+			join_libs( cfg.libs )
+		)
+
+		local ldflags_key = OS .. "_ldflags"
+		if cfg[ ldflags_key ] then
+			printf( "    extra_ldflags = %s", cfg[ ldflags_key ] )
+		end
+
+		printf( "default %s", full_name )
+	end
+end
