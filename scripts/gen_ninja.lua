@@ -6,56 +6,54 @@ local function copy( t )
 	return res
 end
 
-local configs = {
-	[ "windows" ] = {
-		bin_suffix = ".exe",
-		obj_suffix = ".obj",
-		lib_suffix = ".lib",
+local configs = { }
 
-		toolchain = "msvc",
+configs[ "windows" ] = {
+	bin_suffix = ".exe",
+	obj_suffix = ".obj",
+	lib_suffix = ".lib",
 
-		cxxflags = "/I . /c /Oi /Gm- /GR- /EHa- /EHsc /nologo /DNOMINMAX /DWIN32_LEAN_AND_MEAN",
-		ldflags = "user32.lib shell32.lib advapi32.lib dbghelp.lib /nologo",
-		warnings = "/W4 /wd4100 /wd4146 /wd4189 /wd4201 /wd4324 /wd4351 /wd4127 /wd4505 /wd4530 /wd4702 /D_CRT_SECURE_NO_WARNINGS",
-	},
+	toolchain = "msvc",
 
-	[ "windows-debug" ] = {
-		cxxflags = "/Od /MTd /Z7 /Zo",
-		ldflags = "/Od /MTd /Z7 /Zo",
-	},
-	[ "windows-release" ] = {
-		cxxflags = "/O2 /MT /DRELEASE_BUILD",
-		bin_prefix = "release/",
-	},
+	cxxflags = "/I . /c /Oi /Gm- /GR- /EHa- /EHsc /nologo /DNOMINMAX /DWIN32_LEAN_AND_MEAN",
+	ldflags = "user32.lib shell32.lib advapi32.lib dbghelp.lib /nologo",
+	warnings = "/W4 /wd4100 /wd4146 /wd4189 /wd4201 /wd4324 /wd4351 /wd4127 /wd4505 /wd4530 /wd4702 /D_CRT_SECURE_NO_WARNINGS",
+}
 
-	[ "linux" ] = {
-		obj_suffix = ".o",
-		lib_prefix = "lib",
-		lib_suffix = ".a",
+configs[ "windows-debug" ] = {
+	cxxflags = "/Od /MTd /Z7 /Zo",
+	ldflags = "/Od /MTd /Z7 /Zo",
+}
+configs[ "windows-release" ] = {
+	cxxflags = "/O2 /MT /DRELEASE_BUILD",
+	bin_prefix = "release/",
+}
 
-		toolchain = "gcc",
-		cxx = "g++",
+configs[ "linux" ] = {
+	obj_suffix = ".o",
+	lib_prefix = "lib",
+	lib_suffix = ".a",
 
-		cxxflags = "-I . -c -x c++ -std=c++11 -static-libstdc++ -msse2 -ffast-math -fno-exceptions -fno-rtti -fno-strict-aliasing -fno-strict-overflow -fdiagnostics-color",
-		ldflags = "-lm -lpthread -ldl -no-pie -static-libstdc++",
-		warnings = "-Wall -Wextra -Wno-unused-parameter -Wno-unused-function -Wshadow -Wcast-align -Wstrict-overflow -Wvla -Wformat-security", -- -Wconversion
-	},
+	toolchain = "gcc",
+	cxx = "g++",
 
-	[ "linux-debug" ] = {
-		cxxflags = "-O0 -ggdb3 -fno-omit-frame-pointer",
-	},
-	[ "linux-asan" ] = {
-		bin_suffix = "-asan",
-		cxxflags = "-O0 -ggdb3 -fno-omit-frame-pointer -fsanitize=address",
-		ldflags = "-fsanitize=address",
-	},
-	[ "linux-release" ] = {
-		cxxflags = "-O2 -DRELEASE_BUILD",
-		ldflags = "-s",
-		bin_prefix = "release/",
-	},
+	cxxflags = "-I . -c -x c++ -std=c++11 -msse2 -ffast-math -fno-exceptions -fno-rtti -fno-strict-aliasing -fno-strict-overflow -fdiagnostics-color",
+	ldflags = "-no-pie -static-libstdc++",
+	warnings = "-Wall -Wextra -Wno-unused-parameter -Wno-unused-function -Wshadow -Wcast-align -Wstrict-overflow -Wvla -Wformat-security", -- -Wconversion
+}
 
-	-- TODO: mingw?
+configs[ "linux-debug" ] = {
+	cxxflags = "-g -fno-omit-frame-pointer",
+}
+configs[ "linux-asan" ] = {
+	bin_suffix = "-asan",
+	cxxflags = "-g -fno-omit-frame-pointer -fsanitize=address",
+	ldflags = "-fsanitize=address",
+}
+configs[ "linux-release" ] = {
+	bin_prefix = "release/",
+	cxxflags = "-O2 -DRELEASE_BUILD",
+	ldflags = "-s",
 }
 
 OS = os.name:lower()
@@ -306,13 +304,9 @@ automatically_print_output_at_exit = setmetatable( { }, {
 				joinpb( cfg.prebuilt_libs, lib_suffix, lib_prefix )
 			)
 
-			local ldflags_key = toolchain .. "_ldflags"
-			local extra_ldflags_key = toolchain .. "_extra_ldflags"
+			local ldflags_key = OS .. "_ldflags"
 			if cfg[ ldflags_key ] then
 				printf( "    ldflags = %s", cfg[ ldflags_key ] )
-			end
-			if cfg[ extra_ldflags_key ] then
-				printf( "    extra_ldflags = %s", cfg[ extra_ldflags_key ] )
 			end
 
 			printf( "default %s", bin_path )

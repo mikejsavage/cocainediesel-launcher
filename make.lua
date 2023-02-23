@@ -16,7 +16,8 @@ bin( "cocainediesel", {
 
 	rc = "cocainediesel_manifest",
 
-	msvc_extra_ldflags = "opengl32.lib gdi32.lib ole32.lib Ws2_32.lib crypt32.lib",
+	windows_ldflags = "opengl32.lib gdi32.lib ole32.lib Ws2_32.lib crypt32.lib",
+	linux_ldflags = "-lm -lpthread -ldl",
 } )
 
 bin( "headlessupdater", {
@@ -25,7 +26,8 @@ bin( "headlessupdater", {
 	libs = { "monocypher", "whereami" },
 	prebuilt_libs = { "curl", OS == "linux" and "mbedtls" or nil },
 
-	msvc_extra_ldflags = "Ws2_32.lib crypt32.lib",
+	windows_ldflags = "Ws2_32.lib crypt32.lib",
+	linux_ldflags = "-lm -lpthread",
 } )
 
 if OS == "windows" then
@@ -42,13 +44,13 @@ end
 bin( "genkeys", {
 	srcs = { "genkeys.cc", "ggformat.cc", "ggentropy.cc" },
 	libs = { "monocypher" },
-	gcc_extra_ldflags = "-static",
+	linux_ldflags = "-static",
 } )
 
 bin( "b2sum", {
 	srcs = { "b2sum.cc", "ggformat.cc" },
 	libs = { "monocypher" },
-	gcc_extra_ldflags = "-static",
+	linux_ldflags = "-static",
 } )
 msvc_obj_cxxflags( "b2sum%.cc", "/O2" )
 gcc_obj_cxxflags( "b2sum%.cc", "-O3" )
@@ -57,6 +59,6 @@ if io.open( "secret_key.h" ) then
 	bin( "sign", {
 		srcs = { "sign.cc", "ggformat.cc" },
 		libs = { "monocypher" },
-		gcc_extra_ldflags = "-static",
+		linux_ldflags = "-static",
 	} )
 end
