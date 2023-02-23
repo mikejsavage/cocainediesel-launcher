@@ -323,7 +323,7 @@ automatically_print_output_at_exit = setmetatable( { }, {
 
 			local ldflags_key = OS .. "_ldflags"
 			if cfg[ ldflags_key ] then
-				printf( "    ldflags = %s", cfg[ ldflags_key ] )
+				printf( "    extra_ldflags = %s", cfg[ ldflags_key ] )
 			end
 
 			printf( "default %s", bin_path )
