@@ -15,7 +15,7 @@ end
 
 bin( "cocainediesel", {
 	srcs = {
-		"main.cc", "updater.cc", "icon.cc", "ggformat.cc", "strlcpy.cc", "strtonum.cc",
+		"main.cc", "updater.cc", "icon.cc", "ggformat.cc", "strlcpy.cc",
 		"patterns.cc", "platform_taskbar.cc", "gl.cc", "glad.cc", "png.cc"
 	},
 
@@ -30,7 +30,7 @@ bin( "cocainediesel", {
 } )
 
 bin( "headlessupdater", {
-	srcs = { "headless.cc", "updater.cc", "ggformat.cc", "strlcpy.cc", "strtonum.cc", "patterns.cc" },
+	srcs = { "headless.cc", "updater.cc", "ggformat.cc", "strlcpy.cc", "patterns.cc" },
 
 	libs = { "monocypher", "whereami" },
 	prebuilt_libs = { platform_curl_libs },

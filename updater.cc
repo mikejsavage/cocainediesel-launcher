@@ -9,7 +9,6 @@
 #include "ggformat.h"
 #include "str.h"
 #include "strlcpy.h"
-#include "strtonum.h"
 #include "patterns.h"
 #include "platform_fs.h"
 #include "platform_time.h"
@@ -407,6 +406,29 @@ u32 clamp_u32( T x ) {
 	return u32( x );
 }
 
+bool parse_u64( u64 * x, array< const char > str ) {
+	if( str.n == 0 )
+		return false;
+
+	u64 res = 0;
+	for( char c : str ) {
+		if( c < '0' || c > '9' )
+			return false;
+
+		if( U64_MAX / 10 < res )
+			return false;
+
+		u64 digit = c - '0';
+		if( U64_MAX - digit < res )
+			return false;
+
+		res = res * 10 + digit;
+	}
+
+	*x = res;
+	return true;
+}
+
 static bool parse_manifest( std::unordered_map< std::string, ManifestEntry > & manifest, const char * data ) {
 	for( array< array< const char > > line : gmatch( data, "([^\n]+)" ) ) {
 		if( line.n != 1 )
@@ -421,14 +443,12 @@ static bool parse_manifest( std::unordered_map< std::string, ManifestEntry > & m
 			return false;
 
 		const str< 256 > file_name( "{}", matches[ 0 ] );
-		const str< 16 > file_size( "{}", matches[ 2 ] );
 		const str< 32 > file_platform( "{}", matches[ 3 ] );
-		u64 size = u64( strtonum( file_size.c_str(), 1, S64_MAX, NULL ) );
 
 		ManifestEntry entry;
-		bool ok_parse = parse_digest( &entry.checksum, matches[ 1 ] );
+		bool ok_parse = parse_digest( &entry.checksum, matches[ 1 ] ) && parse_u64( &entry.file_size, matches[ 2 ] );
 
-		if( matches[ 0 ].n > file_name.len() || matches[ 2 ].n > file_size.len() || matches[ 3 ].n > file_platform.len() || size == 0 || !ok_parse ) {
+		if( matches[ 0 ].n > file_name.len() || matches[ 3 ].n > file_platform.len() || !ok_parse || entry.file_size == 0 ) {
 			manifest.clear();
 			return false;
 		}
@@ -437,7 +457,6 @@ static bool parse_manifest( std::unordered_map< std::string, ManifestEntry > & m
 			continue;
 		}
 
-		entry.file_size = size;
 		entry.platform_specific = file_platform != "";
 
 		manifest[ file_name.c_str() ] = entry;
