@@ -12,7 +12,11 @@ int main( int argc, char ** argv ) {
 	}
 
 	size_t manifest_len;
-	const u8 * manifest = file_get_contents( argv[ 1 ], &manifest_len );
+	const char * manifest = file_get_contents_or_empty( argv[ 1 ], &manifest_len );
+	if( strlen( manifest ) == 0 ) {
+		fprintf( stderr, "empty manifest\n" );
+		return 1;
+	}
 
 	u8 signature[ 64 ];
 	crypto_sign( signature, secret_key, NULL, manifest, manifest_len );

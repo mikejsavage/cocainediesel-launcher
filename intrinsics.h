@@ -7,6 +7,7 @@
 
 #include "platform.h"
 #include "platform_backtrace.h"
+#include "log.h"
 
 typedef int8_t s8;
 typedef int16_t s16;
@@ -44,8 +45,6 @@ typedef uintptr_t uptr;
 #define U32 UINT32_C
 #define U64 UINT64_C
 
-#define PI 3.14159265359f
-
 #define STRINGIFY_HELPER( x ) #x
 #define STRINGIFY( x ) STRINGIFY_HELPER( x )
 
@@ -66,28 +65,14 @@ inline void assert_impl( const bool predicate, const char * message ) {
 #define STATIC_ASSERT( p ) static_assert( p, #p )
 
 template< typename T, size_t N >
-char ( &ArrayCountObj( const T ( & )[ N ] ) )[ N ];
-#define ARRAY_COUNT( arr ) ( sizeof( ArrayCountObj( arr ) ) )
-
-#define is_power_of_2( n ) ( ( ( n ) & ( ( n ) - 1 ) ) == 0 )
-
-#define align_power_of_2( n, alignment ) ( ( ( n ) + ( alignment ) - 1 ) & ~( ( alignment ) - 1 ) )
-#define align2( n ) align_power_of_2( n, 2 )
-#define align4( n ) align_power_of_2( n, 4 )
-#define align8( n ) align_power_of_2( n, 8 )
-#define align16( n ) align_power_of_2( n, 16 )
-#define align_arbitrary( n, alignment ) ( ( ( n ) + ( alignment ) - 1 ) / ( alignment ) * ( alignment ) )
-
-#define kilobytes( kb ) ( size_t( kb ) * size_t( 1024 ) )
-#define megabytes( mb ) ( kilobytes( mb ) * size_t( 1024 ) )
-#define gigabytes( gb ) ( megabytes( gb ) * size_t( 1024 ) )
+constexpr size_t ARRAY_COUNT( const T ( &arr )[ N ] ) {
+	return N;
+}
 
 template< typename T >
 constexpr T min( T a, T b ) {
 	return a < b ? a : b;
 }
-
-#define NONCOPYABLE( T ) T( const T & ) = delete; void operator=( const T & ) = delete;
 
 template< typename F >
 struct ScopeExit {
@@ -121,30 +106,43 @@ inline To checked_cast( const From & from ) {
 	return result;
 }
 
+inline void * alloc_size( size_t size ) {
+	void * ptr = malloc( size );
+	if( ptr == NULL ) {
+		FATAL( "malloc" );
+	}
+	return ptr;
+}
+
+template< typename T >
+T * alloc() {
+	return ( T * ) alloc_size( sizeof( T ) );
+}
+
+template< typename T >
+T * alloc_many( size_t n ) {
+	return ( T * ) alloc_size( n * sizeof( T ) );
+}
+
 // TODO: this sucks
-inline u8 * file_get_contents( const char * path, size_t * out_len = NULL ) {
-	FILE * file = fopen( path, "rb" );
-	ASSERT( file != NULL );
+#include "platform_fs.h"
+
+inline const char * file_get_contents_or_empty( const char * path ) {
+	FILE * file = open_file( path, "rb" );
+	if( file == NULL )
+		return "";
 
 	fseek( file, 0, SEEK_END );
 	size_t len = checked_cast< size_t >( ftell( file ) );
 	ASSERT( len < SIZE_MAX );
 	fseek( file, 0, SEEK_SET );
 
-	u8 * contents = ( u8 * ) malloc( len + 1 );
+	char * contents = alloc_many< char >( len + 1 );
 	size_t bytes_read = fread( contents, 1, len, file );
 	contents[ len ] = '\0';
 	ASSERT( bytes_read == len );
 
-	if( out_len ) *out_len = len;
-
 	fclose( file );
 
 	return contents;
-}
-
-template< typename T >
-inline T * realloc_array( T * old, size_t count ) {
-	ASSERT( SIZE_MAX / count >= sizeof( T ) );
-	return ( T * ) realloc( old, count * sizeof( T ) );
 }

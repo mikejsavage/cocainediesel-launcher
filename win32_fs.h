@@ -6,10 +6,7 @@ inline wchar_t * UTF8ToWide( const char * utf8 ) {
 	int len = MultiByteToWideChar( CP_UTF8, 0, utf8, -1, NULL, 0 );
 	ASSERT( len != 0 );
 
-	wchar_t * wide = ( wchar_t * ) malloc( len * sizeof( wchar_t ) );
-	if( wide == NULL )
-		FATAL( "malloc" );
-
+	wchar_t * wide = alloc_many< wchar_t >( len );
 	MultiByteToWideChar( CP_UTF8, 0, utf8, -1, wide, len );
 
 	return wide;
@@ -19,10 +16,7 @@ inline char * WideToUTF8( const wchar_t * wide ) {
 	int len = WideCharToMultiByte( CP_UTF8, 0, wide, -1, NULL, 0, NULL, NULL );
 	ASSERT( len != 0 );
 
-	char * utf8 = ( char * ) malloc( len );
-	if( utf8 == NULL )
-		FATAL( "malloc" );
-
+	char * utf8 = alloc_many< char >( len );
 	WideCharToMultiByte( CP_UTF8, 0, wide, -1, utf8, len, NULL, NULL );
 
 	return utf8;

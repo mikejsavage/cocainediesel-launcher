@@ -181,28 +181,6 @@ static bool parse_digest( Blake2b256 * h, const array< const char > hex ) {
 	return parse_hex( hex, h->digest.ptr() );
 }
 
-static const char * file_get_contents_or_empty( const char * path ) {
-	FILE * file = open_file( path, "rb" );
-	if( file == NULL )
-		return "";
-
-	fseek( file, 0, SEEK_END );
-	size_t len = checked_cast< size_t >( ftell( file ) );
-	ASSERT( len < SIZE_MAX );
-	fseek( file, 0, SEEK_SET );
-
-	char * contents = ( char * ) malloc( len + 1 );
-	if( contents == NULL )
-		FATAL( "malloc" );
-	size_t bytes_read = fread( contents, 1, len, file );
-	contents[ len ] = '\0';
-	ASSERT( bytes_read == len );
-
-	fclose( file );
-
-	return contents;
-}
-
 static void update_smooth( SmoothValue * smooth, double value, double now ) {
 	if( smooth->first ) {
 		smooth->first = false;
