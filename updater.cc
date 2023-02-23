@@ -430,6 +430,8 @@ bool parse_u64( u64 * x, array< const char > str ) {
 }
 
 static bool parse_manifest( std::unordered_map< std::string, ManifestEntry > & manifest, const char * data ) {
+	manifest.clear();
+
 	for( array< array< const char > > line : gmatch( data, "([^\n]+)" ) ) {
 		if( line.n != 1 )
 			return false;
@@ -439,27 +441,19 @@ static bool parse_manifest( std::unordered_map< std::string, ManifestEntry > & m
 		if( !ok )
 			return false;
 
-		if( matches[ 1 ].n != BLAKE2B256_DIGEST_LENGTH * 2 )
+		if( matches[ 0 ].n > 256 || matches[ 1 ].n != BLAKE2B256_DIGEST_LENGTH * 2 )
 			return false;
-
-		const str< 256 > file_name( "{}", matches[ 0 ] );
-		const str< 32 > file_platform( "{}", matches[ 3 ] );
 
 		ManifestEntry entry;
 		bool ok_parse = parse_digest( &entry.checksum, matches[ 1 ] ) && parse_u64( &entry.file_size, matches[ 2 ] );
-
-		if( matches[ 0 ].n > file_name.len() || matches[ 3 ].n > file_platform.len() || !ok_parse || entry.file_size == 0 ) {
-			manifest.clear();
+		if( !ok_parse || entry.file_size == 0 )
 			return false;
-		}
 
-		if( file_platform != "" && file_platform != PLATFORM_NAME ) {
+		entry.platform_specific = matches[ 3 ] != "";
+		if( entry.platform_specific && matches[ 3 ] != PLATFORM_NAME )
 			continue;
-		}
 
-		entry.platform_specific = file_platform != "";
-
-		manifest[ file_name.c_str() ] = entry;
+		manifest[ std::string( matches[ 0 ].begin(), matches[ 0 ].end() ) ] = entry;
 	}
 
 	return true;
