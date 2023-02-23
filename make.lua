@@ -49,30 +49,28 @@ if OS == "windows" then
 	} )
 end
 
-if config == "release" then
-	return
-end
-
-bin( "genkeys", {
-	srcs = { "genkeys.cc", "ggformat.cc", "ggentropy.cc" },
-	libs = { "monocypher" },
-	linux_ldflags = "-static",
-} )
-
-bin( "b2sum", {
-	srcs = { "b2sum.cc", "ggformat.cc" },
-	libs = { "monocypher" },
-	linux_ldflags = "-static",
-} )
-msvc_obj_cxxflags( "b2sum%.cc", "/O2" )
-gcc_obj_cxxflags( "b2sum%.cc", "-O3" )
-
-if io.open( "secret_key.h" ) then
-	bin( "sign", {
-		srcs = { "sign.cc", "ggformat.cc" },
+if config ~= "release" then
+	bin( "genkeys", {
+		srcs = { "genkeys.cc", "ggformat.cc", "ggentropy.cc" },
 		libs = { "monocypher" },
 		linux_ldflags = "-static",
 	} )
+
+	bin( "b2sum", {
+		srcs = { "b2sum.cc", "ggformat.cc" },
+		libs = { "monocypher" },
+		linux_ldflags = "-static",
+	} )
+	msvc_obj_cxxflags( "b2sum%.cc", "/O2" )
+	gcc_obj_cxxflags( "b2sum%.cc", "-O3" )
+
+	if io.open( "secret_key.h" ) then
+		bin( "sign", {
+			srcs = { "sign.cc", "ggformat.cc" },
+			libs = { "monocypher" },
+			linux_ldflags = "-static",
+		} )
+	end
 end
 
 write_ninja_script()
