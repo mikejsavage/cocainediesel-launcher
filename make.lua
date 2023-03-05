@@ -8,13 +8,10 @@ require( "libs.monocypher" )
 require( "libs.stb" )
 require( "libs.whereami" )
 
-local platform_curl_libs = { }
-if OS ~= "macos" then
-	table.insert( platform_curl_libs, "curl" )
-end
-if OS == "linux" then
-	table.insert( platform_curl_libs, "mbedtls" )
-end
+local platform_curl_libs = {
+	{ OS ~= "macos" and "curl" or nil },
+	{ OS == "linux" and "mbedtls" or nil },
+}
 
 bin( "cocainediesel", {
 	srcs = {
