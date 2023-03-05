@@ -289,7 +289,7 @@ rule bin
     description = $out
 
 rule lib
-    command = ar rs $out $in
+    command = ar cr $out $in
     description = $out
 ]] )
 
