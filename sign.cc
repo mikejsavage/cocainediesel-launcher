@@ -11,15 +11,15 @@ int main( int argc, char ** argv ) {
 		return 1;
 	}
 
-	size_t manifest_len;
-	const char * manifest = file_get_contents_or_empty( argv[ 1 ], &manifest_len );
-	if( strlen( manifest ) == 0 ) {
+	const char * manifest = file_get_contents_or_empty( argv[ 1 ] );
+	size_t manifest_len = strlen( manifest );
+	if( manifest_len == 0 ) {
 		fprintf( stderr, "empty manifest\n" );
 		return 1;
 	}
 
 	u8 signature[ 64 ];
-	crypto_sign( signature, secret_key, NULL, manifest, manifest_len );
+	crypto_sign( signature, secret_key, NULL, ( const u8 * ) manifest, manifest_len );
 
 	for( size_t i = 0; i < sizeof( signature ); i++ ) {
 		printf( "%02x", signature[ i ] );
