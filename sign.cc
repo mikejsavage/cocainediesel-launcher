@@ -27,5 +27,7 @@ int main( int argc, char ** argv ) {
 
 	printf( "\n" );
 
+	fwrite( manifest, 1, manifest_len, stdout );
+
 	return 0;
 }
