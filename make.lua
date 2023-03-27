@@ -37,8 +37,6 @@ bin( "headlessupdater", {
 	linux_ldflags = "-lm -lpthread",
 } )
 
-msvc_obj_cxxflags( "updater%.cc", "/Ilibs/mbedtls" )
-
 if OS == "windows" then
 	bin( "elevate_for_update", {
 		srcs = { "elevate_for_update.cc", "ggformat.cc" },
