@@ -48,6 +48,16 @@ local function FilePlatform( path, contents )
 	return ""
 end
 
+local function CopyFile( from, to )
+	local r = assert( io.open( from, "r" ) )
+	local contents = assert( r:read( "*all" ) )
+	assert( r:close() )
+
+	local w = assert( io.open( to, "w" ) )
+	assert( w:write( contents ) )
+	assert( w:close() )
+end
+
 local files = FindAllFiles()
 table.sort( files, function( a, b ) return a.path < b.path end )
 
@@ -66,4 +76,5 @@ for _, file in ipairs( files ) do
 	end
 
 	print( file.path .. " " .. digest .. " " .. file.size .. platform )
+	CopyFile( file.path, "release/" .. digest )
 end
