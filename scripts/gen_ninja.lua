@@ -26,8 +26,8 @@ configs[ "windows" ] = {
 }
 
 configs[ "windows-debug" ] = {
-	cxxflags = "/MTd /Z7 /Zo",
-	ldflags = "/NOLOGO /DEBUG /DEBUG:FASTLINK /FUNCTIONPADMIN /OPT:NOREF /OPT:NOICF",
+	cxxflags = "/MTd /Z7",
+	ldflags = "/NOLOGO /DEBUG:FULL /FUNCTIONPADMIN /OPT:NOREF /OPT:NOICF",
 }
 configs[ "windows-release" ] = {
 	cxxflags = "/O2 /MT /DRELEASE_BUILD",
