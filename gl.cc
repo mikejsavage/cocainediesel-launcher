@@ -112,12 +112,6 @@ static void glfw_error_callback( int code, const char * message ) {
 	WARN( "GLFW error {}: {}", code, message );
 }
 
-static void glfw_focus_callback( GLFWwindow * window, int focused ) {
-	if( focused == GLFW_TRUE ) {
-		glfwSetCursorPos( window, window_size.x / 2, window_size.y / 2 );
-	}
-}
-
 GLFWwindow * gl_init() {
 	glfwSetErrorCallback( glfw_error_callback );
 
@@ -138,6 +132,7 @@ GLFWwindow * gl_init() {
 	// glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
 	glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 2 );
 	glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 0 );
+	glfwWindowHint( GLFW_SCALE_TO_MONITOR, GL_TRUE );
 #if !RELEASE_BUILD && 0
 	glfwWindowHint( GLFW_OPENGL_DEBUG_CONTEXT, 1 );
 #endif
@@ -159,14 +154,19 @@ GLFWwindow * gl_init() {
 	int monitor_top, monitor_left;
 	glfwGetMonitorPos( monitor, &monitor_left, &monitor_top );
 
-	int total_width = width + frame_left + frame_right;
-	int total_height = height + frame_top + frame_bottom;
+	int window_width, window_height;
+	glfwGetWindowSize( window, &window_width, &window_height );
+
+	int total_width = window_width + frame_left + frame_right;
+	int total_height = window_height + frame_top + frame_bottom;
 
 	glfwSetWindowPos( window,
 		monitor_left + mode->width / 2 - total_width / 2,
 		monitor_top + mode->height / 2 - total_height / 2 );
 
-	window_size = v2u32( checked_cast< u32 >( width ), checked_cast< u32 >( height ) );
+	int framebuffer_width, framebuffer_height;
+	glfwGetFramebufferSize( window, &framebuffer_width, &framebuffer_height );
+	window_size = v2u32( checked_cast< u32 >( framebuffer_width ), checked_cast< u32 >( framebuffer_height ) );
 
 	glfwMakeContextCurrent( window );
 

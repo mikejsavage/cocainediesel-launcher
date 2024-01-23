@@ -67,15 +67,19 @@ static void launcher_main( bool autostart ) {
 	ImFont * font_small;
 	ImFont * font_large;
 
+	float scale_x, scale_y;
+	glfwGetWindowContentScale( window, &scale_x, &scale_y );
+	float scale = scale_x < scale_y ? scale_x : scale_y;
+
 	{
 		ImGuiIO & io = ImGui::GetIO();
 		ImFontConfig config;
 		config.FontDataOwnedByAtlas = false;
 		config.OversampleV = 4;
 		io.IniFilename = NULL;
-		io.Fonts->AddFontFromMemoryTTF( montserrat, sizeof( montserrat ), 16.0f, &config );
-		font_small = io.Fonts->AddFontFromMemoryTTF( montserrat, sizeof( montserrat ), 12.0f, &config );
-		font_large = io.Fonts->AddFontFromMemoryTTF( montserrat, sizeof( montserrat ), 32.0f, &config );
+		io.Fonts->AddFontFromMemoryTTF( montserrat, sizeof( montserrat ), floorf( 16.0f * scale ), &config );
+		font_small = io.Fonts->AddFontFromMemoryTTF( montserrat, sizeof( montserrat ), floorf( 12.0f * scale ), &config );
+		font_large = io.Fonts->AddFontFromMemoryTTF( montserrat, sizeof( montserrat ), floorf( 32.0f * scale ), &config );
 	}
 
 	{
@@ -92,6 +96,7 @@ static void launcher_main( bool autostart ) {
 		style.Colors[ ImGuiCol_PlotHistogram ] = ImColor( 0, 0, 0, 128 );
 		style.Colors[ ImGuiCol_WindowBg ] = ImColor( 0, 0, 0, 0 );
 		style.ItemSpacing.y = 8;
+		style.ScaleAllSizes( scale );
 	}
 
 	UpdaterState updater_state = UpdaterState_Init;
@@ -125,7 +130,7 @@ static void launcher_main( bool autostart ) {
 
 		ImGui::SameLine();
 
-		const ImVec2 log_size = ImVec2( 0, 310 );
+		const ImVec2 log_size = ImVec2( 0, 310 * scale_y );
 		if( show_log ) {
 			if( ImGui::Button( "Hide log" ) ) {
 				show_log = false;
@@ -150,13 +155,17 @@ static void launcher_main( bool autostart ) {
 			ImGui::Dummy( log_size );
 		}
 
+		float sx, sy;
+		glfwGetWindowContentScale( window, &sx, &sy );
+		ImGui::Text( "%f %f", sx, sy );
+
 		right_text( "v{}", updater_local_version() );
 
 		bool enter_key_pressed = glfwGetKey( window, GLFW_KEY_ENTER ) == GLFW_PRESS || glfwGetKey( window, GLFW_KEY_SPACE ) == GLFW_PRESS;
 
 		ImGui::PushFont( font_large );
 		if( updater_state == UpdaterState_ReadyToPlay ) {
-			bool launch = ImGui::Button( "Play", ImVec2( -1, 50 ) );
+			bool launch = ImGui::Button( "Play", ImVec2( -1, 50 * scale_y ) );
 
 			if( launch || enter_key_pressed ) {
 				run_game( GAME_BINARY );
@@ -164,7 +173,7 @@ static void launcher_main( bool autostart ) {
 		}
 		else if( updater_state == UpdaterState_NeedsUpdate ) {
 			str< 256 > button_text( "Update to v{} - {.2}MB", updater_remote_version(), updater_update_size() / 1000.0 / 1000.0 );
-			bool update = ImGui::Button( button_text.c_str(), ImVec2( -1, 50 ) );
+			bool update = ImGui::Button( button_text.c_str(), ImVec2( -1, 50 * scale_y ) );
 
 			if( update || enter_key_pressed ) {
 #if PLATFORM_WINDOWS
@@ -185,7 +194,7 @@ static void launcher_main( bool autostart ) {
 			}
 
 			str< 256 > progress_text( "{}%. {.1}{}", int( progress * 100 ), display_speed, unit );
-			ImGui::ProgressBar( progress, ImVec2( -1, 50 ), progress_text.c_str() );
+			ImGui::ProgressBar( progress, ImVec2( -1, 50 * scale_y ), progress_text.c_str() );
 
 			taskbar_progress( window, updater_bytes_downloaded(), updater_update_size() );
 		}
@@ -194,12 +203,12 @@ static void launcher_main( bool autostart ) {
 			ImGui::PushStyleColor( ImGuiCol_ButtonActive, IM_COL32( 0, 0, 0, 0 ) );
 
 			if( updater_state == UpdaterState_InstallingUpdate ) {
-				ImGui::Button( "Installing update...", ImVec2( -1, 50 ) );
+				ImGui::Button( "Installing update...", ImVec2( -1, 50 * scale_y ) );
 
 				taskbar_clear( window );
 			}
 			else {
-				ImGui::Button( "Checking for updates...", ImVec2( -1, 50 ) );
+				ImGui::Button( "Checking for updates...", ImVec2( -1, 50 * scale_y ) );
 			}
 
 			ImGui::PopStyleColor( 2 );
