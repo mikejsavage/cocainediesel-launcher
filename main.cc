@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include <math.h>
 
 #include "intrinsics.h"
 #include "updater.h"
