@@ -203,6 +203,8 @@ static void update_smooth( SmoothValue * smooth, double value, double now ) {
 
 static std::string get_executable_path( int * dir_length ) {
 	int path_length = wai_getExecutablePath( NULL, 0, NULL );
+	if( path_length == -1 )
+		FATAL( "wai_getExecutablePath" );
 	std::string result;
 	result.resize( path_length );
 	wai_getExecutablePath( &result[ 0 ], path_length, dir_length );
