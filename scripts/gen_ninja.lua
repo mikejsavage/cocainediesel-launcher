@@ -11,6 +11,14 @@ local function copy( t, extra )
 	return res
 end
 
+local zig
+do
+    local f = assert( io.open( "scripts/zig_version.txt", "r" ) )
+    local zig_version = assert( f:read( "*all" ) ):gsub( "%s+$", "" )
+    assert( f:close() )
+    zig = "scripts/zig-" .. zig_version .. "/zig"
+end
+
 local configs = { }
 
 configs[ "windows" ] = {
@@ -40,10 +48,10 @@ configs[ "linux" ] = {
 	lib_suffix = ".a",
 
 	toolchain = "gcc",
-	cxx = "g++",
+	cxx = zig .. " c++",
+	ar = zig .. " ar",
 
-	cxxflags = "-I . -c -x c++ -std=c++11 -msse2 -ffast-math -fno-exceptions -fno-rtti -fno-strict-aliasing -fno-strict-overflow -fdiagnostics-color",
-	ldflags = "-no-pie -static-libstdc++",
+	cxxflags = "-I . -c -std=c++17 -msse2 -fno-exceptions -fno-rtti -fno-strict-aliasing -fno-strict-overflow -fdiagnostics-color",
 	warnings = "-Wall -Wextra -Wno-unused-parameter -Wno-unused-function -Wshadow -Wcast-align -Wstrict-overflow -Wvla -Wformat-security", -- -Wconversion
 }
 
@@ -58,7 +66,8 @@ configs[ "linux-asan" ] = {
 configs[ "linux-release" ] = {
 	output_dir = "release/",
 	cxxflags = "-O2 -DRELEASE_BUILD",
-	ldflags = "-s",
+	ldflags = "-fstrip",
+	can_static_link = true,
 }
 
 configs[ "macos" ] = copy( configs[ "linux" ], {
@@ -106,6 +115,7 @@ local prebuilt_lib_dir = rightmost( "prebuilt_lib_dir" )
 prebuilt_lib_dir = prebuilt_lib_dir == "" and OS_config or prebuilt_lib_dir
 local cxxflags = concat( "cxxflags" ) .. " " .. concat( "warnings" )
 local ldflags = concat( "ldflags" )
+local can_static_link = rightmost( "can_static_link" ) == true
 
 toolchain = rightmost( "toolchain" )
 
@@ -275,28 +285,45 @@ rule rc
     description = $in
 ]] )
 
-	elseif toolchain == "gcc" then
+else
+
+printf( "cpp = %s", rightmost( "cxx" ) )
+printf( "ar = %s", rightmost( "ar" ) )
 
 printf( [[
+rule zig
+    command = scripts/download_zig.sh
+    description = Downloading zig, this can be slow and first time linking is slow, subsequent builds will go fast
+    generator = true
+
+build %s: zig scripts/download_zig.sh
+
 rule cpp
-    command = g++ -MD -MF $out.d $cxxflags $extra_cxxflags -c -o $out $in
+    command = $cpp -MD -MF $out.d $cxxflags $extra_cxxflags -c -o $out $in --target=x86_64-linux-musl
     depfile = $out.d
     description = $in
     deps = gcc
 
 rule bin
-    command = g++ -o $out $in $ldflags $extra_ldflags
+    command = %s build-exe -femit-bin=$out $in -lc -lc++ $ldflags $extra_ldflags
+    description = $out
+
+rule bin-static
+    command = %s build-exe -femit-bin=$out $in -lc -lc++ $ldflags $extra_ldflags -target x86_64-linux-musl -static
     description = $out
 
 rule lib
     command = ar cr $out $in
     description = $out
+]], zig, zig, zig )
+
+printf( [[
 ]] )
 
 	end
 
 	for src_name, cfg in sort_by_key( objs ) do
-		printf( "build %s/%s%s: cpp %s", dir, src_name, obj_suffix, src_name )
+		printf( "build %s/%s%s: cpp %s%s", dir, src_name, obj_suffix, src_name, OS == "linux" and ( " | " .. zig ) or "" )
 		if cfg.cxxflags then
 			printf( "    cxxflags = %s", cfg.cxxflags )
 		end
@@ -323,10 +350,12 @@ rule lib
 		end
 
 		local full_name = output_dir .. bin_name .. bin_suffix
-		printf( "build %s: bin %s %s",
+		printf( "build %s: %s %s %s%s",
 			full_name,
+			( can_static_link and not cfg.no_static_link ) and "bin-static" or "bin",
 			join_srcs( srcs ),
-			join_libs( cfg.libs )
+			join_libs( cfg.libs ),
+			OS == "linux" and ( " | " .. zig ) or ""
 		)
 
 		local ldflags_key = OS .. "_ldflags"

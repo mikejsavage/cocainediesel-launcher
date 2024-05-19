@@ -1,22 +1,16 @@
-build
-release
+/scripts/zig-*
+/build
+/release
+/build.ninja
 
-build.ninja
+/*.exe
+/*.pdb
+/*.ilk
 
-*.exe
-*.pdb
-*.ilk
-*.suo
-*.trace
+/cocainediesel
+/headlessupdater
+/b2sum
+/genkeys
+/sign
 
-cocainediesel
-headlessupdater
-b2sum
-genkeys
-sign
-
-secret_key.h
-
-/*.*.*.*
-
-WC
+/secret_key.h

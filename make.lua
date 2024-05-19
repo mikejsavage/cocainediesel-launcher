@@ -25,7 +25,9 @@ bin( "cocainediesel", {
 
 	windows_ldflags = "opengl32.lib gdi32.lib ole32.lib Ws2_32.lib crypt32.lib",
 	macos_ldflags = "-lcurl -framework Cocoa -framework CoreVideo -framework IOKit",
-	linux_ldflags = "-lm -lpthread -ldl",
+	linux_ldflags = "-ldl",
+
+	no_static_link = true,
 } )
 
 bin( "headlessupdater", {
@@ -48,13 +50,11 @@ if config ~= "release" then
 	bin( "genkeys", {
 		srcs = { "genkeys.cc", "ggformat.cc", "ggentropy.cc" },
 		libs = { "monocypher" },
-		linux_ldflags = "-static",
 	} )
 
 	bin( "b2sum", {
 		srcs = { "b2sum.cc", "ggformat.cc" },
 		libs = { "monocypher" },
-		linux_ldflags = "-static",
 	} )
 	msvc_obj_cxxflags( "b2sum%.cc", "/O2" )
 	gcc_obj_cxxflags( "b2sum%.cc", "-O3" )
@@ -63,7 +63,6 @@ if config ~= "release" then
 		bin( "sign", {
 			srcs = { "sign.cc", "ggformat.cc" },
 			libs = { "monocypher" },
-			linux_ldflags = "-static",
 		} )
 	end
 end
