@@ -330,7 +330,6 @@ rule bin
 rule bin-static
     command = %s build-exe -femit-bin=$out $in -lc -lc++ $ldflags $extra_ldflags -static
     description = $out
-end
 ]], zig, zig )
 
 		end
