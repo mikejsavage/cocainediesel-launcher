@@ -83,6 +83,7 @@ configs[ "macos-debug" ] = {
 }
 configs[ "macos-release" ] = copy( configs[ "linux-release" ], {
 	ldflags = "-Wl,-dead_strip -Wl,-x",
+	can_static_link = false,
 } )
 
 OS = os.name:lower()
