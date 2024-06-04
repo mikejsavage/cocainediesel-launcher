@@ -7,6 +7,9 @@
 /*.pdb
 /*.ilk
 
+/installer/CocaineDiesel.dmg
+/installer/dmg
+
 /cocainediesel
 /headlessupdater
 /b2sum
