@@ -42,6 +42,8 @@ configs[ "windows-release" ] = {
 	output_dir = "release/",
 }
 
+local gcc_common_cxxflags = "-I . -c -std=c++17 -fno-exceptions -fno-rtti -fno-strict-aliasing -fno-strict-overflow -fdiagnostics-color"
+
 configs[ "linux" ] = {
 	obj_suffix = ".o",
 	lib_prefix = "lib",
@@ -51,16 +53,16 @@ configs[ "linux" ] = {
 	cxx = zig .. " c++",
 	ar = zig .. " ar",
 
-	cxxflags = "-I . -c -std=c++17 -msse2 -fno-exceptions -fno-rtti -fno-strict-aliasing -fno-strict-overflow -fdiagnostics-color",
+	cxxflags = gcc_common_cxxflags .. " -msse2 --target=x86_64-linux-musl",
 	warnings = "-Wall -Wextra -Wno-unused-parameter -Wno-unused-function -Wshadow -Wcast-align -Wstrict-overflow -Wvla -Wformat-security", -- -Wconversion
 }
 
 configs[ "linux-debug" ] = {
-	cxxflags = "-g -fno-omit-frame-pointer",
+	cxxflags = "-ggdb3 -fno-omit-frame-pointer",
 }
 configs[ "linux-asan" ] = {
 	bin_suffix = "-asan",
-	cxxflags = "-g -fno-omit-frame-pointer -fsanitize=address",
+	cxxflags = "-ggdb3 -fno-omit-frame-pointer -fsanitize=address",
 	ldflags = "-fsanitize=address",
 }
 configs[ "linux-release" ] = {
@@ -72,11 +74,12 @@ configs[ "linux-release" ] = {
 
 configs[ "macos" ] = copy( configs[ "linux" ], {
 	cxx = "clang++",
-	ldflags = "",
-	cxxflags = configs[ "linux" ].cxxflags .. " -mmacosx-version-min=10.13",
+	ar = "ar",
+	cxxflags = gcc_common_cxxflags .. " -arch arm64 -mmacosx-version-min=10.13",
+	ldflags = "-arch arm64",
 } )
 configs[ "macos-debug" ] = {
-	cxxflags = "-O0 -g -fno-omit-frame-pointer",
+	cxxflags = "-ggdb3 -fno-omit-frame-pointer",
 }
 configs[ "macos-release" ] = copy( configs[ "linux-release" ], {
 	ldflags = "-Wl,-dead_strip -Wl,-x",
@@ -285,7 +288,7 @@ rule rc
     description = $in
 ]] )
 
-else
+	else
 
 printf( "cpp = %s", rightmost( "cxx" ) )
 printf( "ar = %s", rightmost( "ar" ) )
@@ -299,23 +302,38 @@ rule zig
 build %s: zig scripts/download_zig.sh
 
 rule cpp
-    command = $cpp -MD -MF $out.d $cxxflags $extra_cxxflags -c -o $out $in --target=x86_64-linux-musl
+    command = $cpp -MD -MF $out.d $cxxflags $extra_cxxflags -c -o $out $in
     depfile = $out.d
     description = $in
     deps = gcc
 
+rule lib
+    command = $ar cr $out $in
+    description = $out
+]], zig )
+
+		if OS == "macos" then
+
+printf( [[
+rule bin
+    command = $cpp -o $out $in $ldflags $extra_ldflags
+    description = $out
+]] )
+
+		else
+
+printf( [[
 rule bin
     command = %s build-exe -femit-bin=$out $in -lc -lc++ $ldflags $extra_ldflags
     description = $out
 
 rule bin-static
-    command = %s build-exe -femit-bin=$out $in -lc -lc++ $ldflags $extra_ldflags -target x86_64-linux-musl -static
+    command = %s build-exe -femit-bin=$out $in -lc -lc++ $ldflags $extra_ldflags -static
     description = $out
+end
+]], zig, zig )
 
-rule lib
-    command = ar cr $out $in
-    description = $out
-]], zig, zig, zig )
+		end
 
 printf( [[
 ]] )
