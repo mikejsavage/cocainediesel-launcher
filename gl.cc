@@ -132,7 +132,7 @@ GLFWwindow * gl_init() {
 	// glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
 	glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 2 );
 	glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 0 );
-	glfwWindowHint( GLFW_SCALE_TO_MONITOR, GL_TRUE );
+	glfwWindowHint( GLFW_SCALE_TO_MONITOR, GLFW_TRUE );
 #if !RELEASE_BUILD && 0
 	glfwWindowHint( GLFW_OPENGL_DEBUG_CONTEXT, 1 );
 #endif
