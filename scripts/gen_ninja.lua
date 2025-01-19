@@ -68,14 +68,14 @@ configs[ "linux-asan" ] = {
 configs[ "linux-release" ] = {
 	output_dir = "release/",
 	cxxflags = "-O2 -DRELEASE_BUILD",
-	ldflags = "-fstrip",
+	ldflags = "-fstrip -target x86_64-linux-gnu.2.27",
 	can_static_link = true,
 }
 
 configs[ "macos" ] = copy( configs[ "linux" ], {
 	cxx = "clang++",
 	ar = "ar",
-	cxxflags = gcc_common_cxxflags .. " -arch arm64 -mmacosx-version-min=10.13",
+	cxxflags = gcc_common_cxxflags .. " -arch arm64 -mmacosx-version-min=10.15",
 	ldflags = "-arch arm64",
 } )
 configs[ "macos-debug" ] = {
