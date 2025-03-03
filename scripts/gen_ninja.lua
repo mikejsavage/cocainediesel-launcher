@@ -329,7 +329,7 @@ rule bin
     description = $out
 
 rule bin-static
-    command = %s build-exe -femit-bin=$out $in -lc -lc++ $ldflags $extra_ldflags -static
+    command = %s build-exe -femit-bin=$out $in -lc -lc++ $ldflags $extra_ldflags -target x86_64-linux-musl -static
     description = $out
 ]], zig, zig )
 
