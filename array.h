@@ -4,7 +4,6 @@
 
 #include "intrinsics.h"
 #include "ggformat.h"
-#include "strlcpy.h"
 #include "log.h"
 
 template< typename T >
@@ -202,8 +201,9 @@ private:
 
 inline void format( FormatBuffer * fb, array< const char > arr, const FormatOpts & opts ) {
 	if( fb->len < fb->capacity ) {
-		size_t len = min( arr.n + 1, fb->capacity - fb->len );
-		SafeStrCpy( fb->buf + fb->len, arr.ptr(), len );
+		size_t len = min( arr.n, fb->capacity - fb->len - 1 );
+		memcpy( fb->buf + fb->len, arr.ptr(), len );
+		fb->buf[ fb->len + len ] = '\0';
 	}
 	fb->len += arr.n;
 }

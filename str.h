@@ -5,7 +5,6 @@
 #include <string.h>
 
 #include "intrinsics.h"
-#include "strlcpy.h"
 #include "ggformat.h"
 
 template< size_t N >

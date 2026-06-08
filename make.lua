@@ -15,7 +15,7 @@ local platform_curl_libs = {
 
 bin( "cocainediesel", {
 	srcs = {
-		"main.cc", "updater.cc", "icon.cc", "ggformat.cc", "strlcpy.cc",
+		"main.cc", "updater.cc", "icon.cc", "ggformat.cc",
 		"patterns.cc", "platform_taskbar.cc", "gl.cc", "glad.cc", "png.cc"
 	},
 
@@ -31,7 +31,7 @@ bin( "cocainediesel", {
 } )
 
 bin( "headlessupdater", {
-	srcs = { "headless.cc", "updater.cc", "ggformat.cc", "strlcpy.cc", "patterns.cc" },
+	srcs = { "headless.cc", "updater.cc", "ggformat.cc", "patterns.cc" },
 	libs = { "monocypher", "whereami", platform_curl_libs },
 
 	windows_ldflags = "Ws2_32.lib crypt32.lib",

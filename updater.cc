@@ -8,7 +8,6 @@
 #include "log.h"
 #include "ggformat.h"
 #include "str.h"
-#include "strlcpy.h"
 #include "patterns.h"
 #include "platform_fs.h"
 #include "platform_time.h"
